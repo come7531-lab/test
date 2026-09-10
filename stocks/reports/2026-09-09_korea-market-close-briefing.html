@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>2026년 9월 9일 국내 증시 마감 브리핑</title>
+  <style>
+    :root{
+      --ink:#17213c;--muted:#667085;--line:#e6eaf2;--paper:#f4f6fb;--card:#fff;
+      --up:#df203a;--up-bg:#fff0f2;--down:#1565d8;--down-bg:#edf5ff;
+      --flat:#667085;--navy:#182651;--violet:#6b4ac8;--amber:#a35d00;
+      --shadow:0 14px 40px rgba(27,39,76,.09);--radius:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;max-width:100%;overflow-x:hidden;background:var(--paper);color:var(--ink)}
+    body{font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo",system-ui,-apple-system,sans-serif;line-height:1.62;word-break:keep-all;overflow-wrap:anywhere}
+    a{color:#3156a3;text-decoration:none;border-bottom:1px solid #b6c4e1}
+    .wrap{width:min(100%,980px);margin:auto;padding:18px 14px 52px}
+    .hero{position:relative;overflow:hidden;padding:30px 24px;border-radius:28px;background:linear-gradient(135deg,#15234e 0%,#3b2b78 58%,#9f394b 145%);color:white;box-shadow:var(--shadow)}
+    .hero:before,.hero:after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.09)}
+    .hero:before{width:190px;height:190px;right:40px;bottom:-130px}.hero:after{width:240px;height:240px;right:-100px;top:-120px}
+    .eyebrow{font-size:12px;letter-spacing:.12em;font-weight:850;color:#dce1ff}.hero h1{font-size:clamp(28px,7vw,46px);line-height:1.16;margin:8px 0 10px;letter-spacing:-.045em}.hero p{margin:0;color:#eaecff;font-size:15px;max-width:730px}.legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.pill{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.12);font-size:12px;font-weight:850}.dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+    .section{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:21px 18px;box-shadow:0 8px 24px rgba(27,39,76,.055)}
+    .section h2{margin:0 0 15px;font-size:21px;letter-spacing:-.035em}.section h3{margin:17px 0 8px;font-size:16px}.lead{font-size:18px;line-height:1.56;margin:0}.callout{padding:16px;border-radius:16px;background:linear-gradient(120deg,#f7f4ff,#fff5f6);border-left:5px solid var(--violet)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.metric{padding:15px;border:1px solid var(--line);border-radius:17px;background:#fcfdff;min-width:0}.label{font-size:12px;color:var(--muted);font-weight:850}.value{font-size:23px;font-weight:950;letter-spacing:-.04em;margin:3px 0}.sub{font-size:12px;color:var(--muted)}
+    .up{color:var(--up)!important}.down{color:var(--down)!important}.flat{color:var(--flat)!important}.upbox{background:var(--up-bg);border-color:#ffd5db}.downbox{background:var(--down-bg);border-color:#cfe4ff}
+    .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.stock{padding:19px;border:1px solid var(--line);border-radius:19px;background:#fff;min-width:0}.stock h3{margin:0 0 3px;font-size:18px}.ticker{font-size:11px;color:var(--muted);font-weight:850}.price{font-size:27px;font-weight:950;letter-spacing:-.05em;margin:11px 0 2px}.move{font-size:17px;font-weight:900}.flow{margin:13px 0 0;padding:11px 12px;background:#f7f9fc;border-radius:13px;font-size:13px}.flow div+div{margin-top:4px}.note{font-size:13px;color:#475467;margin-top:10px}.warn{padding:12px 14px;border-radius:14px;background:#fff8e9;border:1px solid #f4d9a3;color:#684009;font-size:13px}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:13px}.fact,.view{padding:16px;border-radius:16px}.fact{background:#f1f7ff;border:1px solid #d8e9ff}.view{background:#fff7ee;border:1px solid #ffe2bd}.tag{font-size:11px;font-weight:900;letter-spacing:.09em;margin-bottom:7px}.fact .tag{color:#2467b2}.view .tag{color:var(--amber)}
+    ul{margin:8px 0;padding-left:20px}li+li{margin-top:7px}.tight li+li{margin-top:4px}
+    .bar{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:13px 0;border-top:1px solid var(--line)}.bar:first-of-type{border-top:0}.bar strong{display:block}.bar .right{text-align:right;flex:0 0 auto;font-weight:900}
+    .timeline{border-left:2px solid #ccd5e6;margin-left:6px;padding-left:18px}.event{position:relative;margin:0 0 16px}.event:before{content:"";position:absolute;left:-24px;top:7px;width:10px;height:10px;border-radius:50%;background:var(--violet);box-shadow:0 0 0 4px #eee9ff}.event b{display:block;font-size:14px}.event span{font-size:13px;color:var(--muted)}
+    .rank{counter-reset:item;list-style:none;padding:0;margin:0}.rank li{counter-increment:item;display:flex;gap:11px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}.rank li:first-child{border-top:0}.rank li:before{content:counter(item);display:grid;place-items:center;width:27px;height:27px;flex:none;border-radius:9px;background:var(--navy);color:white;font-size:13px;font-weight:900}
+    .signals{display:grid;grid-template-columns:1fr 1fr;gap:13px}.signal{padding:17px;border-radius:17px}.positive{background:#fff1f2;border:1px solid #ffd0d7}.caution{background:#edf5ff;border:1px solid #cde2ff}.signal h3{margin:0 0 10px}.signal ul{font-size:13px}
+    .source-list{font-size:13px}.source-list li+li{margin-top:9px}.foot{margin-top:18px;color:#6f7890;font-size:12px;text-align:center;padding:0 12px}.mini{font-size:12px;color:var(--muted)}
+    @media(max-width:760px){.cards{grid-template-columns:1fr}.grid,.split,.signals{grid-template-columns:1fr}.hero{padding:25px 19px}.section{padding:19px 16px}.price{font-size:25px}.bar{display:block}.bar .right{text-align:left;margin-top:4px}.wrap{padding:10px 10px 38px}}
+    @media(min-width:761px){.grid.market{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <div class="eyebrow">KOREA MARKET CLOSE · 2026.09.09</div>
+    <h1>7,000선 회복<br>SK hynix가 주도</h1>
+    <p>기관이 KOSPI를 끌고 외국인은 SK hynix를 골라 샀다. 다만 Brent 100달러와 내일 리밸런싱이 상승의 연속성을 시험한다.</p>
+    <div class="legend"><span class="pill up"><i class="dot"></i>상승·순매수</span><span class="pill down"><i class="dot"></i>하락·순매도</span><span class="pill">회색은 보합·미확정</span></div>
+  </header>
+
+  <section class="section">
+    <h2>핵심 결론</h2>
+    <div class="callout"><p class="lead"><b>KOSPI는 33거래일 만에 종가 7,000선을 되찾았고, KRX 반도체지수는 시장보다 더 강했어.</b> 다만 외국인은 KOSPI 전체에서 <span class="down"><b>4,351억원 순매도</b></span>했고 기관이 <span class="up"><b>9,422억원 순매수</b></span>하며 상승을 주도했어. 오늘의 본질은 전면적인 외국인 위험선호보다 <b>기관 매수와 SK hynix 중심의 선택적 반도체 강세</b>야.</p></div>
+    <p class="mini">KOSPI 7,000선 종가 회복은 7월 23일 7,096.89 이후 33거래일 만이야. 오늘 장중 고점 7,112.48에서 종가 7,051.64까지는 <span class="down"><b>−0.86%</b></span>; 두 가격을 비교한 고점 반납률이야.</p>
+  </section>
+
+  <section class="section">
+    <h2>KOSPI · 반도체 흐름</h2>
+    <div class="grid market">
+      <div class="metric upbox"><div class="label">KOSPI</div><div class="value">7,051.64</div><div class="up"><b>▲ 97.12 · +1.40%</b></div><div class="sub">9/8 종가 6,954.52 대비</div></div>
+      <div class="metric downbox"><div class="label">외국인</div><div class="value down">−4,351억</div><div class="sub">KOSPI 순매도</div></div>
+      <div class="metric upbox"><div class="label">기관</div><div class="value up">+9,422억</div><div class="sub">KOSPI 순매수</div></div>
+      <div class="metric downbox"><div class="label">개인</div><div class="value down">−2조2,879억</div><div class="sub">KOSPI 순매도</div></div>
+      <div class="metric upbox"><div class="label">KOSDAQ</div><div class="value">830.37</div><div class="up"><b>▲ 18.49 · +2.28%</b></div><div class="sub">9/8 종가 811.88 대비</div></div>
+      <div class="metric upbox"><div class="label">KRX 반도체</div><div class="value">14,217.16</div><div class="up"><b>▲ 397.69 · +2.88%</b></div><div class="sub">9/8 종가 13,819.47 대비</div></div>
+      <div class="metric"><div class="label">시장 폭</div><div class="value">463 / 400</div><div class="sub">상승 / 하락 종목 수</div></div>
+      <div class="metric"><div class="label">장중 범위</div><div class="value">6,968–7,112</div><div class="sub">KOSPI 저가–고가</div></div>
+    </div>
+    <p class="note">KRX 반도체의 <span class="up"><b>+2.88%</b></span>는 9월 8일 종가 13,819.47과 9월 9일 종가 14,217.16을 비교한 상승률로, KOSPI의 같은 기준 상승률 <span class="up"><b>+1.40%</b></span>를 1.48%포인트 웃돌았어. KOSDAQ도 같은 종가 비교로 <span class="up"><b>+2.28%</b></span> 올라 상승 폭이 전날보다 넓어졌어.</p>
+  </section>
+
+  <section class="section">
+    <h2>핵심 3종목</h2>
+    <div class="cards">
+      <article class="stock">
+        <h3>Samsung Electronics</h3><div class="ticker">삼성전자 · 005930</div>
+        <div class="price">269,500원</div><div class="move flat">━ 0원 · 0.00%</div>
+        <div class="sub">9/8 종가 269,500원과 같은 가격</div>
+        <div class="flow"><div>외국인 <b class="down">−2,884,161주</b></div><div>기관 <b class="up">+1,740,154주</b></div><div>개인 <b class="down">−920,131주</b></div></div>
+        <div class="note">장중 275,000원에서 종가까지 <span class="down"><b>−2.00%</b></span> 밀렸어. 기관 매수에도 외국인 매도와 리밸런싱 경계가 상단을 눌렀다는 해석이 가능해.</div>
+      </article>
+      <article class="stock">
+        <h3>SK hynix</h3><div class="ticker">한국 HBM·메모리 · 000660</div>
+        <div class="price">1,856,000원</div><div class="move up">▲ 63,000원 · +3.51%</div>
+        <div class="sub">9/8 종가 1,793,000원 대비</div>
+        <div class="flow"><div>외국인 <b class="up">+41,716주</b></div><div>기관 <b class="up">+74,984주</b></div><div>개인 <b class="down">−752,453주</b></div></div>
+        <div class="note">외국인·기관 동반 순매수로 세 종목 중 가장 강했어. 장중 고점 1,883,000원과 종가 비교로는 <span class="down"><b>−1.43%</b></span>야.</div>
+      </article>
+      <article class="stock">
+        <h3>SK Square</h3><div class="ticker">한국 투자지주사 · 402340</div>
+        <div class="price">1,138,000원</div><div class="move up">▲ 7,000원 · +0.62%</div>
+        <div class="sub">9/8 종가 1,131,000원 대비</div>
+        <div class="flow"><div>9/9 외국인·기관 <b class="flat">최종 수량 갱신 전</b></div><div>9/8 외국인 <b class="up">+94,072주</b></div><div>9/8 기관 <b class="up">+49,731주</b></div></div>
+        <div class="note">상승했지만 SK hynix보다 2.89%포인트 덜 올랐어. 2.89%포인트는 오늘 두 종목의 일간 상승률 3.51%와 0.62% 차이야. 고점 1,157,000원과 종가 비교로는 <span class="down"><b>−1.64%</b></span>야.</div>
+      </article>
+    </div>
+    <p class="warn"><b>수급 표기 주의:</b> Samsung Electronics와 SK hynix의 9월 9일 값은 KRX 마감 집계야. SK Square는 보고서 작성 시점에 종목별 최종 외국인·기관 수량이 아직 공개 화면에 반영되지 않아, 최신 확정치인 9월 8일 수급을 날짜와 함께 표시했어.</p>
+  </section>
+
+  <section class="section">
+    <h2>상승 원인 — 사실과 해석</h2>
+    <div class="split">
+      <div class="fact"><div class="tag">FACT · 확인된 사실</div><ul class="tight"><li>KOSPI와 KRX 반도체지수는 각각 <b class="up">+1.40%</b>, <b class="up">+2.88%</b> 올랐어. 둘 다 9월 8일 종가와 9월 9일 종가 비교야.</li><li>기관은 KOSPI를 9,422억원 순매수했고 외국인은 4,351억원 순매도했어.</li><li>SK hynix에는 외국인과 기관이 함께 순매수했지만 Samsung Electronics는 외국인이 약 288만주 순매도했어.</li><li>전날 미국은 주요 지수가 하락했지만 PHLX Semiconductor Index(미국 주요 반도체 지수)는 <b class="up">+1.30%</b> 올랐어. 이는 9월 4일 종가와 9월 8일 종가 비교야.</li></ul></div>
+      <div class="view"><div class="tag">VIEW · 해석</div><ul class="tight"><li>국내 반등은 광범위한 외국인 위험선호보다 기관 자금과 메모리 업종 선택 매수가 주도했어.</li><li>SK hynix는 HBM·메모리 실적 기대에 가장 직접적으로 반응했고, Samsung Electronics는 같은 반도체 강세 속에서도 외국인 매도와 내일 수급 이벤트로 보합에 그쳤어.</li><li>SK Square가 SK hynix 상승을 충분히 따라가지 못해 지주회사 할인 축소 모멘텀은 잠시 약해졌다고 봐.</li><li>Brent 100달러 접근에도 반도체가 오른 것은 오늘 업황 기대가 매크로 부담을 이겼다는 뜻이지만, 물가지표가 높게 나오면 균형이 다시 바뀔 수 있어.</li></ul></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>환율 · 유가 · 미국 금리</h2>
+    <div class="bar"><div><strong>원/달러 환율</strong><span class="mini">9/9 16:20 실시간</span></div><div class="right">1,336.50원<br><span class="down">▼ 5.00원 · −0.37%</span></div></div>
+    <p class="mini"><span class="down"><b>−0.37%</b></span>는 Npay 증권 전일 기준값 1,341.50원과 9월 9일 16시 20분 1,336.50원을 비교한 달러 가격 하락률이야. 원화 강세 방향으로 외국인 환차손 우려를 낮춰.</p>
+    <div class="bar"><div><strong>Brent(유럽 기준 국제유가)</strong><span class="mini">9/9 15:14 KST 무렵</span></div><div class="right">$99.22<br><span class="up">▲ +1.30%</span></div></div>
+    <p class="mini"><span class="up"><b>+1.30%</b></span>는 9월 8일 국제시장 결제값과 9월 9일 06시 14분 GMT 가격 99.22달러를 비교한 장중 상승률이야. 100달러 돌파가 가까워 물가·금리 부담을 키워.</p>
+    <div class="bar"><div><strong>미국 10년물 국채금리</strong><span class="mini">9/9 새벽 시세</span></div><div class="right">4.800%<br><span class="down">▼ 0.0037%p</span></div></div>
+    <p class="mini">4.800%는 10년 만기 미국 국채의 연율 수익률 수준이야. 전일 기준값 4.8037%와 비교하면 0.0037%포인트 낮아졌으며, 금리가 0.37% 하락했다는 의미는 아니야.</p>
+  </section>
+
+  <section class="section">
+    <h2>전날 미국 반도체 · 빅테크</h2>
+    <p class="note">아래 모든 등락률은 미국 Labor Day(노동절) 연휴 전 마지막 거래일인 <b>9월 4일 종가와 9월 8일 종가를 비교한 일간 수치</b>야.</p>
+    <div class="grid">
+      <div class="metric downbox"><div class="label">Dow Jones<br>미국 전통 대기업 지수</div><div class="value down">−1.18%</div></div>
+      <div class="metric downbox"><div class="label">S&amp;P 500<br>미국 대형주 지수</div><div class="value down">−0.58%</div></div>
+      <div class="metric downbox"><div class="label">Nasdaq Composite<br>미국 기술주 지수</div><div class="value down">−0.32%</div></div>
+      <div class="metric upbox"><div class="label">PHLX Semiconductor Index<br>미국 주요 반도체 지수</div><div class="value up">+1.30%</div></div>
+      <div class="metric downbox"><div class="label">NVIDIA<br>인공지능 GPU 회사</div><div class="value down">−1.97%</div></div>
+      <div class="metric downbox"><div class="label">Micron Technology<br>미국 메모리 회사</div><div class="value down">−1.58%</div></div>
+      <div class="metric upbox"><div class="label">Broadcom<br>인공지능·통신 반도체 회사</div><div class="value up">+3.02%</div></div>
+      <div class="metric upbox"><div class="label">Advanced Micro Devices<br>미국 CPU·GPU 회사</div><div class="value up">+5.90%</div></div>
+      <div class="metric upbox"><div class="label">Intel<br>미국 CPU·반도체 회사</div><div class="value up">+9.03%</div></div>
+      <div class="metric upbox"><div class="label">Qualcomm<br>모바일·AI 반도체 회사</div><div class="value up">+3.17%</div></div>
+      <div class="metric downbox"><div class="label">Apple<br>아이폰 회사</div><div class="value down">−1.11%</div></div>
+      <div class="metric downbox"><div class="label">Microsoft<br>윈도우·클라우드 회사</div><div class="value down">−1.14%</div></div>
+      <div class="metric downbox"><div class="label">Amazon<br>온라인 쇼핑·클라우드 회사</div><div class="value down">−0.60%</div></div>
+      <div class="metric"><div class="label">Alphabet<br>구글 모회사</div><div class="value flat">−0.01%</div></div>
+      <div class="metric downbox"><div class="label">Meta Platforms<br>페이스북·인스타그램 모회사</div><div class="value down">−0.56%</div></div>
+    </div>
+    <p class="note">유가 급등으로 미국 지수는 약했지만 반도체 안에서는 차별화가 컸어. Intel과 Qualcomm은 Amazon과 맞춤형 AI 칩을 개발하는 계약 소식에 강했고, OpenAI(생성형 AI 개발회사)의 GPT-6 Astra 공개 뒤 소프트웨어 경쟁 우려가 커지며 Salesforce(기업용 고객관리 소프트웨어 회사) 등은 약세였어. 국내에는 ‘AI 인프라·반도체 선호’가 더 강하게 전달됐어.</p>
+  </section>
+
+  <section class="section">
+    <h2>예정 지표와 세 종목 영향 경로</h2>
+    <div class="timeline">
+      <div class="event"><b>9월 10일 21:30 KST · 미국 8월 PPI</b><span>생산자물가가 유가 충격을 얼마나 반영하는지 확인하는 첫 관문.</span></div>
+      <div class="event"><b>9월 11일 21:30 KST · 미국 8월 CPI</b><span>전월 대비 수치는 8월 소비자물가를 7월과 비교. 근원 물가와 에너지 전이가 핵심.</span></div>
+      <div class="event"><b>9월 17일 03:00 KST · FOMC 금리 결정·점도표</b><span>Federal Reserve(미국 중앙은행)의 9월 15~16일 회의 결과와 2026년 남은 금리 경로.</span></div>
+      <div class="event"><b>9월 30일 21:30 KST · 미국 8월 PCE</b><span>Federal Reserve가 선호하는 물가지표. 근원 전월 대비 수치가 중요.</span></div>
+      <div class="event"><b>10월 2일 21:30 KST · 미국 9월 고용</b><span>완만한 둔화가 최선. 과열은 금리 부담, 급랭은 AI 투자·메모리 수요 우려.</span></div>
+    </div>
+    <div class="split">
+      <div class="fact"><div class="tag">물가 상방 / 고용 과열</div><b>유가 상승 → CPI·PCE 압력 → 국채금리 상승</b><p class="note">SK hynix의 성장 프리미엄이 가장 민감하고, SK Square는 보유지분 가치와 지주회사 할인 경로, Samsung Electronics는 반도체 가치평가와 외국인 수급 경로로 부담을 받아.</p></div>
+      <div class="view"><div class="tag">물가 안정 / 고용 완만 둔화</div><b>금리 안정 → AI·HBM 실적에 초점 복귀</b><p class="note">SK hynix가 가장 직접적이고, SK Square는 SK hynix 지분가치 상승, Samsung Electronics는 메모리·HBM 회복 기대 강화 경로가 열려. 다만 고용 급랭은 빅테크 AI 투자 둔화 우려를 부를 수 있어.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>2026년 남은 기간 순위</h2>
+    <div class="split">
+      <div><h3>최대 상승 탄력 · 순위 변경</h3><ol class="rank"><li><b>SK hynix</b> <span class="up">2위→1위</span></li><li><b>SK Square</b> <span class="down">1위→2위</span></li><li><b>Samsung Electronics</b> 유지</li></ol></div>
+      <div><h3>실적 확실성 · 유지</h3><ol class="rank"><li><b>SK hynix</b></li><li><b>Samsung Electronics</b></li><li><b>SK Square</b></li></ol></div>
+    </div>
+    <p class="note">SK hynix가 9월 7·8·9일 세 거래일 연속 SK Square보다 높은 일간 상승률을 기록했고, 오늘 외국인·기관 동반 순매수까지 확인돼 최대 상승 탄력 1위로 다시 올렸어. 실적 확실성은 HBM·메모리 가격과 이익의 연결이 가장 직접적인 SK hynix가 계속 1위야. SK Square는 보유지분 상승과 별개로 지주회사 할인율 변수가 남아 있어.</p>
+  </section>
+
+  <section class="section">
+    <h2>다음 거래일 신호</h2>
+    <p class="warn"><b>내일 특수 변수:</b> 9월 10일은 국내 주가지수·개별주식 선물·옵션 만기가 겹치는 ‘네 마녀의 날’이야. 같은 날 종가 부근 KRX 반도체지수 리밸런싱으로 SK hynix 약 1조2천억원, Samsung Electronics 약 2천억원의 매도 수요가 나올 수 있다는 증권사 추정이 있어. 이는 실적 악화가 아니라 수급 이벤트이며 실제 규모는 달라질 수 있어.</p>
+    <div class="signals">
+      <div class="signal positive"><h3 class="up">긍정 신호</h3><ul><li>KOSPI 7,000선 유지와 오늘 고점 7,112.48 돌파</li><li>외국인 KOSPI 수급이 오늘 4,351억원 순매도에서 순매수로 전환</li><li>KRX 반도체지수 14,217.16 이상 유지</li><li>Samsung Electronics 275,000원 돌파와 외국인 매수 전환</li><li>SK hynix 1,800,000원 방어·1,883,000원 돌파</li><li>SK Square 1,157,000원 돌파와 SK hynix 대비 상대강도 회복</li><li>Brent 97달러 아래·미국 10년물 4.75% 아래 안정</li><li>미국 PPI가 시장 예상에 부합하거나 하회</li></ul></div>
+      <div class="signal caution"><h3 class="down">주의 신호</h3><ul><li>KOSPI 7,000선 및 오늘 저점 6,968.06 이탈</li><li>장 마감 직전 리밸런싱 매도로 반도체 급변동</li><li>Samsung Electronics 267,500원 이탈</li><li>SK hynix 1,795,000원 이탈</li><li>SK Square 1,111,000원 이탈</li><li>외국인의 Samsung Electronics 대규모 순매도 지속</li><li>Brent 100달러 돌파·미국 10년물 4.85% 돌파</li><li>PPI·CPI 상방 충격으로 9월 금리인상 경계 확대</li></ul></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>출처</h2>
+    <ul class="source-list">
+      <li><a href="https://m.stock.naver.com/">Npay 증권 · 9월 9일 KOSPI·KOSDAQ·환율·미국 주요지수·국채금리</a></li>
+      <li><a href="https://finance.naver.com/sise/sise_index.naver?code=KOSPI">Npay 증권 · KOSPI 종가·투자자 수급</a></li>
+      <li><a href="https://alphasquare.co.kr/home/market-summary">AlphaSquare · 국내 시장·투자자 수급·시장 폭</a></li>
+      <li><a href="https://alphasquare.co.kr/home/stock-summary?code=005930">AlphaSquare · Samsung Electronics 종가·수급</a></li>
+      <li><a href="https://alphasquare.co.kr/home/stock-summary?code=000660">AlphaSquare · SK hynix 종가·수급</a></li>
+      <li><a href="https://finance.naver.com/item/frgn.naver?code=402340">Npay 증권 · SK Square 종가·수급</a></li>
+      <li><a href="https://kr.investing.com/indices/krx-semiconductor">Investing.com · KRX 반도체지수</a></li>
+      <li><a href="https://www.reuters.com/business/wall-st-futures-slip-oil-surge-puts-markets-edge-2026-09-08/">Reuters · 9월 8일 미국 증시 마감</a></li>
+      <li><a href="https://www.reuters.com/business/energy/oil-jumps-1-early-trade-after-iran-launches-missiles-jordan-2026-09-09/">Reuters · 9월 9일 Brent 유가</a></li>
+      <li><a href="https://www.yna.co.kr/amp/view/AKR20260908113200008">연합뉴스 · 9월 10일 KRX 반도체 ETF 리밸런싱 추정</a></li>
+      <li><a href="https://www.bls.gov/schedule/2026/09_sched.htm">BLS(미국 노동통계국) · PPI·CPI·고용 일정</a></li>
+      <li><a href="https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm">Federal Reserve(미국 중앙은행) · FOMC 일정</a></li>
+      <li><a href="https://www.bea.gov/news/schedule">BEA(미국 경제분석국) · PCE 일정</a></li>
+    </ul>
+    <p class="mini">기준: 2026년 9월 9일 한국 정규장 마감. 환율은 16시 20분, Brent는 15시 14분 KST 무렵, 미국 국채금리는 9월 9일 새벽 공개 시세야. 국내 수급은 KRX 기준이며 KRX·NXT 합산 보도와 금액이 다를 수 있어. 해외 개별주 등락률은 공개 시세 기준 반올림했어.</p>
+  </section>
+
+  <footer class="foot">본 보고서는 최신 공개자료를 바탕으로 작성한 참고용 분석이며, 특정 종목·금융상품의 매수 또는 매도를 권유하지 않습니다.</footer>
+</main>
+</body>
+</html>
