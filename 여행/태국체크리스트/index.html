@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>태국 여행 체크리스트</title>
+<style>
+:root{
+  --bg:#f6f7fb; --card:#ffffff; --ink:#16181d; --muted:#6b7280;
+  --line:#e7e9ee; --accent:#10b981; --accent2:#0ea5e9; --warn:#fff7ed;
+  --danger:#b91c1c; --shadow:0 8px 30px rgba(17,24,39,.07);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",Roboto,Arial,sans-serif}
+.wrap{max-width:760px;margin:auto;padding:0 14px 80px}
+.hero{padding:28px 4px 12px}
+.hero h1{font-size:31px;margin:0 0 6px;letter-spacing:-1px}
+.hero p{margin:0;color:var(--muted);line-height:1.55;font-size:14px}
+.sticky{position:sticky;top:0;z-index:20;padding:10px 0 12px;background:linear-gradient(var(--bg) 78%,rgba(246,247,251,0))}
+.progress-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+.row{display:flex;align-items:center;gap:10px}
+.progress-label{font-size:15px;font-weight:750;flex:1}
+.pct{font-size:14px;color:var(--muted)}
+.bar{height:10px;background:#edf0f4;border-radius:999px;overflow:hidden;margin-top:10px}
+.fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:.2s}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:11px}
+button{border:0;border-radius:11px;padding:10px 8px;font-size:13px;cursor:pointer;background:#111827;color:white}
+button.ghost{background:#eef0f4;color:#2b2f36}
+.notice{background:var(--warn);border:1px solid #fed7aa;border-radius:16px;padding:14px 15px;margin:8px 0 16px;line-height:1.55;font-size:14px}
+.notice a{color:#075985;text-decoration:none}
+.quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 16px}
+.pill{background:#fff;border:1px solid var(--line);padding:10px 12px;border-radius:13px;font-size:13px;color:#40444c}
+details{background:var(--card);border:1px solid var(--line);border-radius:18px;margin:11px 0;overflow:hidden;box-shadow:0 2px 12px rgba(17,24,39,.035)}
+summary{list-style:none;cursor:pointer;padding:17px 16px;font-size:17px;font-weight:760;display:flex;align-items:center;gap:9px}
+summary::-webkit-details-marker{display:none}
+summary .count{margin-left:auto;color:var(--muted);font-weight:600;font-size:13px}
+.content{padding:0 15px 13px}
+.item{display:flex;gap:11px;align-items:flex-start;padding:11px 2px;border-top:1px solid #f0f1f4}
+.item input{appearance:none;-webkit-appearance:none;width:23px;height:23px;border:2px solid #c7cbd3;border-radius:7px;margin:0;flex:0 0 23px;display:grid;place-content:center;background:#fff}
+.item input:checked{background:var(--accent);border-color:var(--accent)}
+.item input:checked:after{content:"✓";color:#fff;font-size:16px;font-weight:900;line-height:1}
+.item label{font-size:15px;line-height:1.45;cursor:pointer;flex:1}
+.item.checked label{text-decoration:line-through;color:#9aa0aa}
+.tag{display:inline-block;font-size:11px;padding:3px 7px;border-radius:999px;background:#eef2ff;color:#4338ca;margin-left:6px;vertical-align:1px}
+.tag.hot{background:#fef2f2;color:#b91c1c}
+.tag.thai{background:#ecfeff;color:#0e7490}
+.custom{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;margin-top:14px}
+.custom h3{margin:0 0 10px;font-size:16px}
+.custom-row{display:flex;gap:8px}
+.custom input[type=text]{flex:1;border:1px solid #d8dbe1;border-radius:10px;padding:11px 12px;font-size:14px}
+.custom button{padding:0 16px}
+.small{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5}
+.footer{color:var(--muted);font-size:12px;text-align:center;margin-top:25px;line-height:1.6}
+@media(min-width:620px){.quick{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>🇹🇭 태국 여행 체크리스트</h1>
+    <p>방콕·푸켓·치앙마이 등 태국 여행 공통용. 체크 상태는 이 기기에 자동 저장돼요.</p>
+  </div>
+
+  <div class="sticky">
+    <div class="progress-card">
+      <div class="row">
+        <div class="progress-label" id="progressLabel">0개 완료</div>
+        <div class="pct" id="pct">0%</div>
+      </div>
+      <div class="bar"><div class="fill" id="fill"></div></div>
+      <div class="actions">
+        <button onclick="openAll()">전부 펼치기</button>
+        <button class="ghost" onclick="closeAll()">전부 접기</button>
+        <button class="ghost" onclick="resetAll()">체크 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice">
+    입국 핵심: 태국 디지털 입국신고서 TDAC는 비태국 국적자가 입국 전 제출해야 해요.
+    도착일 포함 3일 전부터 제출 가능하고, 여권·항공편·태국 숙소 주소 등이 필요해요.
+    <br><a href="https://tdac.immigration.go.th/" target="_blank" rel="noopener">→ 태국 이민국 TDAC 공식 사이트 열기</a>
+  </div>
+
+  <div class="quick">
+    <div class="pill">🛂 여권</div>
+    <div class="pill">📱 휴대폰·eSIM</div>
+    <div class="pill">💳 카드·바트</div>
+    <div class="pill">💊 복용약</div>
+  </div>
+
+  <details open data-section="출국 전 필수">
+    <summary>🚨 출국 전 필수 <span class="count"></span></summary>
+    <div class="content">
+      <div class="item"><input type="checkbox" id="a1"><label for="a1">여권 챙기기 <span class="tag hot">최우선</span></label></div>
+      <div class="item"><input type="checkbox" id="a2"><label for="a2">여권 유효기간 확인</label></div>
+      <div class="item"><input type="checkbox" id="a3"><label for="a3">TDAC 제출하고 확인 화면 저장 <span class="tag thai">태국</span></label></div>
+      <div class="item"><input type="checkbox" id="a4"><label for="a4">항공권 예약·탑승 터미널 확인</label></div>
+      <div class="item"><input type="checkbox" id="a5"><label for="a5">숙소 예약 확인서와 영문 주소 저장</label></div>
+      <div class="item"><input type="checkbox" id="a6"><label for="a6">귀국 항공권 또는 다음 목적지 항공권 확인</label></div>
+      <div class="item"><input type="checkbox" id="a7"><label for="a7">여행자보험 가입·증권 저장</label></div>
+      <div class="item"><input type="checkbox" id="a8"><label for="a8">여권 사진면·항공권·숙소 예약 화면 캡처</label></div>
+      <div class="item"><input type="checkbox" id="a9"><label for="a9">공항까지 가는 교통편·출발 시간 확인</label></div>
+    </div>
+  </details>
+
+  <details data-section="돈·결제">
+    <summary>💳 돈·결제 <span class="count"></span></summary>
+    <div class="content">
+      <div class="item"><input type="checkbox" id="b1"><label for="b1">해외결제 가능한 카드 2장 이상</label></div>
+      <div class="item"><input type="checkbox" id="b2"><label for="b2">태국 바트 소액 현금</label></div>
+      <div class="item"><input type="checkbox" id="b3"><label for="b3">비상용 현금 별도 보관</label></div>
+      <div class="item"><input type="checkbox" id="b4"><label for="b4">카드 해외사용 차단 여부 확인</label></div>
+      <div class="item"><input type="checkbox" id="b5"><label for="b5">카드사 앱 로그인·분실신고 방법 확인</label></div>
+      <div class="item"><input type="checkbox" id="b6"><label for="b6">카드 한 장은 메인 지갑과 다른 곳에 분산</label></div>
+    </div>
+  </details>
+
+  <details data-section="휴대폰·전자기기">
+    <summary>📱 휴대폰·전자기기 <span class="count"></span></summary>
+    <div class="content">
+      <div class="item"><input type="checkbox" id="c1"><label for="c1">eSIM·유심·로밍 준비</label></div>
+      <div class="item"><input type="checkbox" id="c2"><label for="c2">eSIM 설치 및 활성화 방법 캡처</label></div>
+      <div class="item"><input type="checkbox" id="c3"><label for="c3">휴대폰 충전기</label></div>
+      <div class="item"><input type="checkbox" id="c4"><label for="c4">충전 케이블</label></div>
+      <div class="item"><input type="checkbox" id="c5"><label for="c5">보조배터리 — 위탁하지 말고 기내 휴대</label></div>
+      <div class="item"><input type="checkbox" id="c6"><label for="c6">멀티충전기·여행용 어댑터</label></div>
+      <div class="item"><input type="checkbox" id="c7"><label for="c7">이어폰·헤드폰</label></div>
+      <div class="item"><input type="checkbox" id="c8"><label for="c8">Grab 설치·로그인·결제수단 등록 <span class="tag thai">태국</span></label></div>
+      <div class="item"><input type="checkbox" id="c9"><label for="c9">Google Maps 오프라인 지도 저장</label></div>
+      <div class="item"><input type="checkbox" id="c10"><label for="c10">번역 앱 준비</label></div>
+    </div>
+  </details>
+
+  <details data-section="기내 가방">
+    <summary>✈️ 기내 가방 <span class="count"></span></summary>
+    <div class="content">
+      <div class="item"><input type="checkbox" id="d1"><label for="d1">여권·지갑·휴대폰</label></div>
+      <div class="item"><input type="checkbox" id="d2"><label for="d2">보조배터리·충전 케이블</label></div>
+      <div class="item"><input type="checkbox" id="d3"><label for="d3">매일 먹는 약·중요 의약품</label></div>
+      <div class="item"><input type="checkbox" id="d4"><label for="d4">안경·렌즈</label></div>
+      <div class="item"><input type="checkbox" id="d5"><label for="d5">얇은 겉옷 — 기내 냉방 대비</label></div>
+      <div class="item"><input type="checkbox" id="d6"><label for="d6">립밤·소형 보습제</label></div>
+      <div class="item"><input type="checkbox" id="d7"><label for="d7">물티슈·티슈·마스크</label></div>
+      <div class="item"><input type="checkbox" id="d8"><label for="d8">수하물 지연 대비 속옷·얇은 옷 1벌</label></div>
+    </div>
+  </details>
+
+  <details data-section="의약품">
+    <summary>💊 의약품 <span class="count"></span></summary>
+    <div class="content">
+      <div class="item"><input type="checkbox" id="e1"><label for="e1">평소 복용약</label></div>
+      <div class="item"><input type="checkbox" id="e2"><label for="e2">진통제</label></div>
+      <div class="item"><input type="checkbox" id="e3"><label for="e3">소화제</label></div>
+      <div class="item"><input type="checkbox" id="e4"><label for="e4">지사제</label></div>
+      <div class="item"><input type="checkbox" id="e5"><label for="e5">감기약·알레르기약</label></div>
+      <div class="item"><input type="checkbox" id="e6"><label for="e6">밴드·상처 연고</label></div>
+      <div class="item"><input type="checkbox" id="e7"><label for="e7">모기기피제·벌레 물림용 제품 <span class="tag thai">태국 추천</span></label></div>
+      <div class="item"><input type="checkbox" id="e8"><label for="e8">처방약은 가능하면 원래 포장·처방 정보와 함께</label></div>
+    </div>
+  </details>
+
+  <details data-section="세면·화장품">
+    <summary>🧴 세면·화장품 <span class="count"></span></summary>
+    <div class="content">
+      <div class="item"><input type="checkbox" id="f1"><label for="f1">칫솔·치약</label></div>
+      <div class="item"><input type="checkbox" id="f2"><label for="f2">클렌징 제품</label></div>
+      <div class="item"><input type="checkbox" id="f3"><label for="f3">스킨·로션·크림</label></div>
+      <div class="item"><input type="checkbox" id="f4"><label for="f4">선크림 <span class="tag thai">필수급</span></label></div>
+      <div class="item"><input type="checkbox" id="f5"><label for="f5">메이크업 제품</label></div>
+      <div class="item"><input type="checkbox" id="f6"><label for="f6">샴푸·트리트먼트 필요 시</label></div>
+      <div class="item"><input type="checkbox" id="f7"><label for="f7">빗·헤어제품</label></div>
+      <div class="item"><input type="checkbox" id="f8"><label for="f8">렌즈·렌즈액·안경</label></div>
+      <div class="item"><input type="checkbox" id="f9"><label for="f9">여성용품</label></div>
+    </div>
+  </details>
+
+  <details data-section="옷·신발">
+    <summary>👗 옷·신발 <span class="count"></span></summary>
+    <div class="content">
+      <div class="item"><input type="checkbox" id="g1"><label for="g1">속옷</label></div>
+      <div class="item"><input type="checkbox" id="g2"><label for="g2">양말</label></div>
+      <div class="item"><input type="checkbox" id="g3"><label for="g3">잠옷</label></div>
+      <div class="item"><input type="checkbox" id="g4"><label for="g4">얇은 상의·하의</label></div>
+      <div class="item"><input type="checkbox" id="g5"><label for="g5">에어컨 대비 얇은 긴팔·가디건</label></div>
+      <div class="item"><input type="checkbox" id="g6"><label for="g6">편한 운동화</label></div>
+      <div class="item"><input type="checkbox" id="g7"><label for="g7">샌들·슬리퍼</label></div>
+      <div class="item"><input type="checkbox" id="g8"><label for="g8">수영복·비치웨어</label></div>
+      <div class="item"><input type="checkbox" id="g9"><label for="g9">모자·선글라스</label></div>
+      <div class="item"><input type="checkbox" id="g10"><label for="g10">사원 방문용 어깨·무릎을 가릴 수 있는 옷 <span class="tag thai">태국</span></label></div>
+      <div class="item"><input type="checkbox" id="g11"><label for="g11">우산 또는 가벼운 우비</label></div>
+    </div>
+  </details>
+
+  <details data-section="여행 소품">
+    <summary>🧳 여행 소품 <span class="count"></span></summary>
+    <div class="content">
+      <div class="item"><input type="checkbox" id="h1"><label for="h1">작은 크로스백·데일리백</label></div>
+      <div class="item"><input type="checkbox" id="h2"><label for="h2">접이식 에코백 — 쇼핑용</label></div>
+      <div class="item"><input type="checkbox" id="h3"><label for="h3">지퍼백·비닐봉투 — 젖은 옷·빨래 분리</label></div>
+      <div class="item"><input type="checkbox" id="h4"><label for="h4">캐리어 네임택</label></div>
+      <div class="item"><input type="checkbox" id="h5"><label for="h5">압축팩·파우치</label></div>
+      <div class="item"><input type="checkbox" id="h6"><label for="h6">손선풍기 있으면 챙기기</label></div>
+    </div>
+  </details>
+
+  <details data-section="집 나가기 직전">
+    <summary>🏠 집 나가기 직전 <span class="count"></span></summary>
+    <div class="content">
+      <div class="item"><input type="checkbox" id="i1"><label for="i1">여권 손에 있는지 마지막 확인</label></div>
+      <div class="item"><input type="checkbox" id="i2"><label for="i2">휴대폰·지갑·카드</label></div>
+      <div class="item"><input type="checkbox" id="i3"><label for="i3">충전 중인 기기·보조배터리 챙김</label></div>
+      <div class="item"><input type="checkbox" id="i4"><label for="i4">가스·인덕션·전열기 확인</label></div>
+      <div class="item"><input type="checkbox" id="i5"><label for="i5">창문·현관문 확인</label></div>
+      <div class="item"><input type="checkbox" id="i6"><label for="i6">쓰레기·음식물 쓰레기 버리기</label></div>
+      <div class="item"><input type="checkbox" id="i7"><label for="i7">냉장고 상할 음식 정리</label></div>
+      <div class="item"><input type="checkbox" id="i8"><label for="i8">공항 터미널 다시 확인</label></div>
+    </div>
+  </details>
+
+  <details data-section="태국 도착 직후">
+    <summary>🌴 태국 도착 직후 <span class="count"></span></summary>
+    <div class="content">
+      <div class="item"><input type="checkbox" id="j1"><label for="j1">데이터 연결 확인</label></div>
+      <div class="item"><input type="checkbox" id="j2"><label for="j2">숙소 영문 주소 바로 열 수 있게 준비</label></div>
+      <div class="item"><input type="checkbox" id="j3"><label for="j3">공항 → 숙소 이동수단 확인</label></div>
+      <div class="item"><input type="checkbox" id="j4"><label for="j4">소액 바트 준비</label></div>
+      <div class="item"><input type="checkbox" id="j5"><label for="j5">Grab 호출 시 차량번호·기사 확인</label></div>
+    </div>
+  </details>
+
+  <details data-section="귀국 전">
+    <summary>🛬 귀국 전 <span class="count"></span></summary>
+    <div class="content">
+      <div class="item"><input type="checkbox" id="k1"><label for="k1">귀국 항공편 시간·터미널 확인</label></div>
+      <div class="item"><input type="checkbox" id="k2"><label for="k2">온라인 체크인</label></div>
+      <div class="item"><input type="checkbox" id="k3"><label for="k3">수하물 무게 확인</label></div>
+      <div class="item"><input type="checkbox" id="k4"><label for="k4">숙소 금고·충전기·콘센트 확인</label></div>
+      <div class="item"><input type="checkbox" id="k5"><label for="k5">여권·지갑·휴대폰 재확인</label></div>
+      <div class="item"><input type="checkbox" id="k6"><label for="k6">택스리펀 대상 구매품 있으면 서류·물품 준비</label></div>
+    </div>
+  </details>
+
+  <div class="custom">
+    <h3>➕ 내 물건 추가</h3>
+    <div class="custom-row">
+      <input id="customText" type="text" placeholder="예: 수영장 방수팩">
+      <button onclick="addCustom()">추가</button>
+    </div>
+    <div id="customList" style="margin-top:8px"></div>
+    <div class="small">추가한 항목과 체크 상태도 이 기기에 저장됩니다.</div>
+  </div>
+
+  <div class="footer">
+    최종 업데이트: 2026-09-22<br>
+    입국 규정은 출발 직전 태국 이민국·주한태국대사관에서 다시 확인하세요.
+  </div>
+</div>
+
+<script>
+const KEY="thai-trip-checklist-20260922";
+const CUSTOM="thai-trip-custom-20260922";
+
+function allChecks(){ return [...document.querySelectorAll('input[type=checkbox]')]; }
+
+function save(){
+  const data={};
+  allChecks().forEach(c=>data[c.id]=c.checked);
+  localStorage.setItem(KEY,JSON.stringify(data));
+}
+
+function load(){
+  let data={};
+  try{data=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+  allChecks().forEach(c=>{if(c.id in data)c.checked=!!data[c.id]});
+}
+
+function update(){
+  allChecks().forEach(c=>c.closest('.item')?.classList.toggle('checked',c.checked));
+  const arr=allChecks(), done=arr.filter(x=>x.checked).length, total=arr.length;
+  const p=total?Math.round(done/total*100):0;
+  document.getElementById('progressLabel').textContent=`${done} / ${total}개 완료`;
+  document.getElementById('pct').textContent=p+"%";
+  document.getElementById('fill').style.width=p+"%";
+  document.querySelectorAll('details').forEach(d=>{
+    const cs=[...d.querySelectorAll('input[type=checkbox]')];
+    const dc=cs.filter(x=>x.checked).length;
+    const el=d.querySelector('.count');
+    if(el)el.textContent=`${dc}/${cs.length}`;
+  });
+  save();
+}
+
+function openAll(){document.querySelectorAll('details').forEach(d=>d.open=true)}
+function closeAll(){document.querySelectorAll('details').forEach(d=>d.open=false)}
+function resetAll(){
+  if(!confirm("모든 체크를 해제할까요?"))return;
+  allChecks().forEach(c=>c.checked=false); update();
+}
+
+function readCustom(){
+  try{return JSON.parse(localStorage.getItem(CUSTOM)||"[]")}catch(e){return []}
+}
+function writeCustom(v){localStorage.setItem(CUSTOM,JSON.stringify(v))}
+function renderCustom(){
+  const list=document.getElementById('customList'); list.innerHTML="";
+  readCustom().forEach((x,i)=>{
+    const row=document.createElement('div'); row.className='item';
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.id='custom_'+i; cb.checked=!!x.checked;
+    const lab=document.createElement('label'); lab.htmlFor=cb.id; lab.textContent=x.text;
+    const del=document.createElement('button'); del.className='ghost'; del.textContent='삭제'; del.style.padding='6px 9px';
+    cb.onchange=()=>{const a=readCustom();a[i].checked=cb.checked;writeCustom(a);update()};
+    del.onclick=()=>{const a=readCustom();a.splice(i,1);writeCustom(a);renderCustom();update()};
+    row.append(cb,lab,del); list.appendChild(row);
+  });
+}
+function addCustom(){
+  const input=document.getElementById('customText'); const t=input.value.trim(); if(!t)return;
+  const a=readCustom(); a.push({text:t,checked:false}); writeCustom(a); input.value=""; renderCustom(); update();
+}
+
+document.getElementById('customText').addEventListener('keydown',e=>{if(e.key==='Enter')addCustom()});
+document.addEventListener('change',e=>{if(e.target.matches('input[type=checkbox]'))update()});
+
+renderCustom(); load(); update();
+</script>
+</body>
+</html>
