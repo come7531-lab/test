@@ -13,11 +13,6 @@
     ['Inter', 'engine/fonts/Inter-700.ttf', '700'],
     ['Inter', 'engine/fonts/Inter-800.ttf', '800'],
     // other scripts (G.text / UI.text pick these automatically for Urdu, Arabic and Hindi runs)
-    ['Noto Nastaliq Urdu', 'engine/fonts/NotoNastaliqUrdu-Regular.ttf', '400'],
-    ['Noto Naskh Arabic', 'engine/fonts/NotoNaskhArabic-Regular.ttf', '400'],
-    ['Noto Naskh Arabic', 'engine/fonts/NotoNaskhArabic-Bold.ttf', '700'],
-    ['Noto Sans Devanagari', 'engine/fonts/NotoSansDevanagari-Regular.ttf', '400'],
-    ['Noto Sans Devanagari', 'engine/fonts/NotoSansDevanagari-Bold.ttf', '700'],
   ];
   G.scale = 1;
 

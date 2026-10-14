@@ -1,69 +1,112 @@
 ---
 name: mind-story
-description: Make a 20-second hand-drawn pastel crayon video (손그림 크레파스 영상) that explains a book's or teacher's core wisdom in six full-frame drawn scenes with hand-written Korean words, diagram arrows, zoom-in/zoom-out camera, bottom subtitles, a soft felt-piano score, far birds and gentle wind whooshes on transitions — exactly the approved "레스터 레븐슨의 지혜" style. Use when the user asks for "크레파스 손그림 영상", "지혜 영상", "그 스타일로 영상", a new episode of this series, or invokes /mind-story with a topic.
+description: Make a hand-drawn pastel crayon video (손그림 크레파스 마음 영상) that explains a book's, teacher's or script's message in full-frame drawn scenes with hand-written Korean words, diagram arrows, zoom-in/zoom-out camera, bottom subtitles, a soft felt-piano score, far birds and soft wind only on transitions — exactly the approved "레스터 레븐슨의 지혜" style. Any length (follows the script or the narration), script-first mode, narration (voice file) mode, 16:9 or vertical 9:16 Shorts/Reels, and a dB sound table on every delivery. Use when the user asks for "크레파스 손그림 영상", "마음 영상", "지혜 영상", "그 스타일로 영상", a new episode of this series, sends a script or a voice file for it, or invokes /mind-story.
 ---
 
 # Mind Story (크레파스 마음 영상)
 
-Builds a new episode of the user's series in the **locked style** of the approved first film
-(`template/` is that exact film, working end to end). Only the story changes; the look and the sound stay.
+Makes a new episode of the user's series in the **locked style** of the approved first film.
+`template/` is that exact film, working end to end. The story, length and format change; the look and the
+sound do not. Read `references/style-guide.md` before writing anything: palette, drawing toolkit,
+layout rules, 9:16 rules, and the locked sound.
 
-Read `references/style-guide.md` before writing anything — it holds the palette, drawing rules, layout
-rules learned in review, subtitle style and the **locked sound mix**.
+Talk to the user in Korean, simply. They are a creator, not a developer.
 
-## Workflow
+## 0. Decide the mode from the request
 
-### 1. Brief (no questions unless the topic is missing)
-From the request take: the book / teacher / topic, and any key message the user names.
-Defaults: 20 s, 16:9, Korean words and subtitles, same music. Ask only if no topic was given.
-Do not invent quotes; express the teaching's core ideas in your own plain words. If unsure of a book's
-exact Korean title, write it neutrally (e.g. "○○○의 지혜") and say so.
+| The user gives… | Do |
+|---|---|
+| only a topic or book | **Script-first.** Write the scene table (below), show it, wait for OK or edits, then make the video. |
+| a script (from you, Claude, GPT…) | Use it as is. Split it into scenes, one sentence = one scene. Show the scene table briefly, then make the video, unless they asked to check it first. |
+| a voice file + its script | **Narration mode** (section 3b). The film length = the voice length. |
+| a voice file without a script | Ask for the script text (one sentence per line). Audio cannot be transcribed here. |
+| a length ("1분", "40초") | Fit the content to that length. Pick the scene count ≈ length ÷ 3.3 s and shorten or merge sentences. Never crop a finished film. |
+| no length | The length follows the script: one scene per sentence. |
+| 쇼츠 / 릴스 / 틱톡 / 세로 | Vertical **9:16**: re-stage every scene for 1080×1920 (style guide §9:16). Say so. |
 
-### 2. Story in six scenes (one per bar, 3.33 s each)
-Write a 6-row plan: picture · hand-written key words · diagram device · subtitle. The proven arc:
-1. **Problem** – a person and the burden (what we cling to), labelled with the key words.
-2. **Mechanism** – a diagram: A → B → C with arrows, ideally a cycle back.
-3. **Turn** – the practice/action shown as a picture (letting go, opening, breathing…).
-4. **Insight** – a zoom into the heart of it (inside vs outside, X over the wrong answer, "이미 여기에!").
-5. **Principle** – a simple hand-drawn graph or scale (one thing goes down, the other up).
-6. **Rest** – a calm landscape, the person at peace, the title as hand lettering + "○○○의 지혜".
+**Scene table** (show this to the user):
 
-### 3. Scaffold
+| # | 자막 (한 문장) | 손글씨 키워드 | 그림 / 다이어그램 | 길이 |
+
+- **Length without narration:** a subtitle up to about 22 characters gets 1 bar (3.3 s); a longer one gets 2 bars.
+- **Proven arc for short films:** problem (person + burden) → mechanism (A→B→C cycle diagram) → turn (the practice, shown) → insight (zoom inside, X over the wrong answer) → principle (a simple graph) → rest (calm landscape + title + "○○○의 지혜").
+- **Longer films:** repeat the middle beats with new pictures. Keep one idea per scene, and keep returning to the same little person.
+- Never invent quotes. Say the ideas plainly. If unsure of a book's Korean title, write it neutrally and say so.
+
+## 1. Scaffold
 ```bash
 sh .claude/skills/mind-story/scripts/new-film.sh <kebab-case-topic>
 ```
-(in the user's repo root unless they name a place). It copies the template and writes `out/chrome.sh`
-(Chromium with `--no-sandbox`). Run every later command as
-`cd <dir> && CHROME_PATH=$PWD/out/chrome.sh node engine/render.js …`.
+- If the skill came from an uploaded zip, the path is the skill's own folder: use the "Base directory for this skill" shown on load + `/scripts/new-film.sh`.
+- Create the project in the working directory unless the user names a place.
+- The script writes `out/chrome.sh` (Chromium with `--no-sandbox`). Run every later command as `cd <dir> && CHROME_PATH=$PWD/out/chrome.sh node engine/render.js …`.
 
-### 4. Edit only the per-film parts
-- **score.js**: `S` (keep six bars), `ev` (the moments things pop / draw), `markers`, `subtitles`,
-  and optionally `MEL` / chord rows (same calm colour). Keep `bpm: 72`, `DURATION = 20`.
-- **film.js**: only the block marked `PER-FILM PART` — the `bgs` backgrounds and the six `sceneX`
-  functions + `SCENES` list. Reuse the toolkit (`crayonFill`, `crayonLine`, `shape`, `blobPts`, `rrPts`,
-  `curve`, `arrow`, `word`, `loop`, `sparkle`, `cloud`, `birdV`, `person`, `hairCap`, `cam`, `vgrad`, `hillPts`,
-  `FULL`, `pr`, `sm`). Do not change the toolkit, palette, fonts, subtitle or cross-fade code.
-- **song.js**: do not change the instruments or the `GAIN` table. Only re-point event-tied sounds if the
-  scene events changed: `birdTimes` (release + final scene) and the `swish` list (scene changes and the
-  `ev` moments where words/clouds fly in).
+## 2. Edit only the per-film parts
+- **score.js:**
+  - `SCENES` (key, sub, bars)
+  - `ev` (moments things pop or draw, via `at(sceneIndex, beats)`)
+  - `sfx` (which moments get a whoosh, a drift or birds)
+  - `FORMAT` for 9:16
+  - Harmony, melody, tempo and accompaniment are locked. They loop to any length and end on Fmaj7·Gsus → Cadd9.
+- **film.js:** only the block marked `PER-FILM PART`, i.e. the `bgs` backgrounds, one `sceneX(ctx, t)` per scene and the `SCENES` list (same keys and order as score.js).
+  - Read times from `S.S[key]` and `ev`, never hard-coded seconds.
+  - Reuse the toolkit: `crayonFill crayonLine shape blobPts rrPts curve arrow word loop sparkle cloud birdV person hairCap cam vgrad hillPts FULL pr sm`.
+  - Do not touch the toolkit, palette, fonts, subtitles or the cross-fade runner.
+- **song.js:** do not touch the instruments. Change sound only through the `LEVEL_DB` knobs (section 5).
 
-### 5. Review, then render
+## 3a. Without narration
+`node song.js` makes the music and prints the sound table.
+
+## 3b. Narration mode
+1. Save the user's script as `script.txt`, one sentence per line, in the same order as `SCENES`.
+2. Run `node tools/align.js <voice file> script.txt`.
+   - It finds the pauses in the voice and writes `voice-timing.js` (the scene and subtitle times).
+   - It copies the voice into the project and prints a table: # · 시작 · 끝 · 문장.
+3. Show that table. Rows marked "확인" were joined or split by guess; check them in a still. A wrong row can be fixed by editing the numbers in `voice-timing.js`.
+4. `SCENES` must have exactly as many scenes as sentences.
+5. `node song.js` loads the voice and dips the music under it (`DUCK`). The table gains a 내레이션 row.
+   - To remove the narration, put back the template's `voice-timing.js` (`const VT = null`).
+
+## 4. Review, then render
 ```bash
-node song.js                                            # out/music.wav (~-30 LUFS)
-node engine/render.js stills 2.5 5.8 9.2 12.5 15.8 18.8 # one mid-scene still each → out/stills/
+node engine/render.js stills <the middle of each scene>   # → out/stills/
 ```
-Look at every still against the layout rules in the style guide; fix and re-render until clean. Then:
+Look at every still against the layout rules; fix and re-render until clean. Then:
 ```bash
-node engine/render.js video     # ~2–3 min: run in the background
+node engine/render.js video     # minutes: run in the background
 node engine/render.js mux       # → out/<dir>.mp4
 node engine/render.js check     # contact sheet + loudness
 ```
 
-### 6. Deliver
-Send `out/<dir>.mp4` to the user, list the six scenes with their subtitles, and say the audio was checked
-by measurement. Commit the project (the `.gitignore` keeps only the final mp4 from `out/`) and push only
-if the user's session/branch instructions say so.
+## 5. Sound in numbers (every delivery)
+- **Always** paste the sound table that `node song.js` prints (also saved in `out/sound-levels.md`) into the reply. Show it with the video, and again after every sound change.
+- Columns:
+  - 설정값: the knob
+  - 들리는 크기: active average, in dBFS
+  - 가장 큰 순간: the peak
+  - Then the total LUFS.
+- The user steers with numbers. Map their words to the knobs in `song.js` `LEVEL_DB`:
 
-### Sound changes on request (no picture re-render)
-If the user only wants the sound changed: edit `song.js`, run `node song.js`, then `node engine/render.js mux`
-(re-uses `out/video.mp4`). Reply with the before → after levels.
+  | 사용자가 하는 말 | knob |
+  |---|---|
+  | 피아노 / 반주 | `piano` |
+  | 멜로디 | `lead` |
+  | 잔향 / 울림 | `verb` |
+  | 새소리 | `birds` |
+  | 바람 / 효과음 | `fx` |
+  | 내레이션 / 목소리 | `voice` |
+  | 음악이 목소리 아래로 깔리는 정도 | `DUCK` (0–0.9) |
+
+- "X 3dB 낮춰" → subtract 3 from that knob. "피아노 전체" → both `piano` and `lead`.
+- "전체 6dB 올려/낮춰" → `LUFS=<current ± 6> node song.js` (same balance, all louder or quieter). Report the new LUFS.
+- Percent requests: 50% ≈ −6 dB, 35% ≈ −9 dB, 70% ≈ −3 dB. Say the dB you applied.
+- **Sound-only change:** edit `song.js`, run `node song.js`, then `node engine/render.js mux`. This re-uses `out/video.mp4`; never re-render the picture for a sound change. Reply with a before → after table.
+- If a new default should stick for future films, also update the knob in the skill's `template/song.js` and its style guide, and tell the user to re-upload the skill zip.
+
+## 6. Deliver
+- Send `out/<dir>.mp4`.
+- List the scenes with their subtitles.
+- Paste the sound table.
+- Say the audio was checked by measurement, not by ear.
+- Offer: 세로(9:16) 버전, 길이 조정, 내레이션 추가.
+- Commit or push only if the session's instructions say so.

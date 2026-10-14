@@ -514,21 +514,29 @@
   // ======================= STYLE TOOLKIT again — subtitles + scene cross-fade runner: keep as is =======================
   // ---------- subtitles (outside the camera, bottom centre) ----------
   function subtitle(ctx, t) {
+    const size = 56, lh = 64;
     for (const s of S.subtitles) {
       if (t < s.t - 0.01 || t > s.end + 0.3) continue;
       const a = Math.min(pr(t, s.t, 0.3), 1 - pr(t, s.end, 0.3));
       if (a <= 0) continue;
-      const size = 56;
       ctx.save();
       ctx.font = `700 ${size}px ${FONT}`;
-      const w = ctx.measureText(s.text).width;
-      const cx = W / 2, cy = H - 108 + (1 - ease.outCubic(pr(t, s.t, 0.35))) * 14;
+      // wrap into two lines when the sentence is wider than 86% of the frame (always on 9:16)
+      let rows = [s.text];
+      if (ctx.measureText(s.text).width > W * 0.86) {
+        const ws = s.text.split(' '); let best = 1, bd = Infinity;
+        for (let k = 1; k < ws.length; k++) { const d = Math.abs(ctx.measureText(ws.slice(0, k).join(' ')).width - ctx.measureText(ws.slice(k).join(' ')).width); if (d < bd) { bd = d; best = k; } }
+        rows = [ws.slice(0, best).join(' '), ws.slice(best).join(' ')];
+      }
+      const w = Math.max(...rows.map((r) => ctx.measureText(r).width));
+      const bottom = Math.min(H - 108, S.SAFE.y + S.SAFE.h - 50); // above the platform UI on 9:16
+      const cx = W / 2, cy = bottom - (rows.length - 1) * lh + (1 - ease.outCubic(pr(t, s.t, 0.35))) * 14;
       ctx.globalAlpha = a;
-      const box = rrPts(cx - w / 2 - 38, cy - 50, w + 76, 86, 30);
+      const box = rrPts(cx - w / 2 - 38, cy - 50, w + 76, 86 + (rows.length - 1) * lh, 30);
       ctx.fillStyle = 'rgba(251,245,232,0.88)'; trace(ctx, box); ctx.fill();
       crayonLine(ctx, box, { color: 'rgba(74,59,51,0.55)', lw: 3, seed: 900 + Math.round(s.t * 10), closed: true, alpha: a });
       ctx.globalAlpha = a;
-      G.text(ctx, s.text, cx, cy + 14, { size, fam: FONT, weight: 700, color: C.ink, align: 'center', boil: 0 });
+      rows.forEach((r, i) => G.text(ctx, r, cx, cy + 14 + i * lh, { size, fam: FONT, weight: 700, color: C.ink, align: 'center', boil: 0 }));
       ctx.restore();
     }
   }
@@ -536,8 +544,6 @@
   Studio.film({
     async init() {
       await Studio.loadFont('Gaegu', 'fonts/Gaegu-Bold.ttf', '700');
-      // (only Gaegu Bold is used; the regular weight and Nanum Pen are optional fallbacks)
-      for (const [f, src, w] of [['Gaegu', 'fonts/Gaegu-Regular.ttf', '400'], ['NanumPen', 'fonts/NanumPenScript-Regular.ttf', '400']]) { try { await Studio.loadFont(f, src, w); } catch (e) { /* optional */ } }
       // wax grain: tiny diagonal flecks of paper
       const c = G.makeCanvas(256, 256), x = c.getContext('2d');
       const r = U.mulberry32(42);

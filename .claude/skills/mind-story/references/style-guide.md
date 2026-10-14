@@ -1,14 +1,22 @@
-# Crayon Wisdom Film — style guide (locked look & sound)
+# Mind Story — style guide (locked look & sound)
 
 This is the approved look and sound of the series (first film: 레스터 레븐슨의 지혜, Oct 2026).
 Every new film must keep these. Only the story, drawings, words and timings change.
 
 ## Format and pacing
-- 16:9, 1920×1080, 30 fps, **20 s**. (9:16 on request: re-stage the scenes, never crop.)
-- `makeClock({ bpm: 72 })` → 1 bar = 3.333 s. **Six scenes, one per bar**: `T(0)…T(5)`, last scene runs to 20 s.
+- 16:9, 1920×1080, 30 fps by default; 9:16 (1080×1920) for Shorts/Reels (see below).
+- `makeClock({ bpm: 72 })` → 1 bar = 3.333 s. **Length is free**: one scene per sentence, 1 bar each (2 bars for a long subtitle);
+  with narration every scene lasts exactly as long as its sentence (`tools/align.js`).
 - Each scene: one idea, one picture that fills the whole frame, 1–3 hand-written key words, one diagram device (arrow, loop, X, graph, cycle).
-- Scenes cross-fade softly for 0.45 s after each bar line (the runner in film.js does it).
+- Scenes cross-fade softly for 0.45 s after each scene start (the runner in film.js does it).
 - The last 0.7 s settle into paper colour (not black).
+
+## 9:16 (Shorts / Reels / TikTok)
+- `FORMAT = U.pickFormat('9:16')` in score.js, then **re-stage every scene for 1080×1920** — never crop the 16:9 picture.
+- Stack the picture vertically: key words and diagrams in the top ~65%, the person / main drawing in the middle,
+  nothing important in the bottom 22% (platform UI) or the right 140 px. The subtitle sits automatically above the
+  bottom 22% and wraps into two lines.
+- Bigger words (key words 90–130 px), fewer elements per scene, the same palette and line weights.
 
 ## Picture
 - **Full-frame drawings, no side text panel.** Every scene background is coloured edge to edge.
@@ -31,19 +39,20 @@ Every new film must keep these. Only the story, drawings, words and timings chan
 
 ## Subtitles
 - Bottom centre, Gaegu Bold 56 px, ink colour, on a rounded cream box `rgba(251,245,232,0.88)` with a thin crayon border; fade + small rise in 0.3 s.
-- One short sentence per scene (≈ 15–22 Korean characters), polite 해요/합니다 tone, `S.subtitles` in score.js with `t: T(n)+0.2, end: T(n+1)-0.2`.
+- One sentence per scene (`sub` in score.js SCENES), polite 해요/합니다 tone. Without narration it shows from the scene start +0.2 s to its end −0.2 s; with narration it follows the spoken sentence. Lines wider than 86% of the frame wrap into two.
 
 ## Sound (LOCKED — the user tuned this by ear; do not change unless asked)
 - **Felt piano** (`softPiano` in song.js): 6 partials, dark roll-off, 35 ms felt attack, no hammer click, low-pass 1300 + 600·vel Hz.
-- Chords (one per bar): Fmaj7 · Em7 · Am7 · Dm9 · Fmaj7→Gsus · Cadd9. You may write a new progression in the same calm major-7/9 colour.
-- Accompaniment: **one soft note per beat** (quarter notes, order 0-2-1-3, vel 0.5/0.4) + a low bass note per chord. Never busy 8ths.
-- Melody: few long notes (E5–A5 range), `softPiano` vel **0.45**, 12 ms behind the beat.
-- Reverb room 0.88 damp 0.45.
-- Birds: a few far chirps (gain 0.12 each) in the "release" moment and the final scene.
-- Wind: **no constant wind, no water/brook.** Only short soft whooshes (`swish`) at each scene change and when words/clouds/balloons fly in.
-- Mix GAIN: `piano 0.268, lead 0.394, verb 0.284, birds 0.9, fx 0.174, nature 0`. Master drive 0.6, no LUFS target → ≈ −30 LUFS. If the user wants it louder for uploading, raise everything together with `LUFS=-24 node song.js` (keeps the balance).
+- Chords loop Fmaj7 · Em7 · Am7 · Dm9 for any length and always end Fmaj7→Gsus · Cadd9.
+- Accompaniment: **one soft note per beat** (order 0-2-1-3, vel 0.5/0.4) + a low bass note per chord. Never busy 8ths.
+- Melody: few long notes, phrases A–D looping, E before the end, a long E5 last; `softPiano` vel **0.45**, 12 ms behind the beat.
+- Reverb room 0.88 damp 0.45. Birds: a few far chirps (score.js `sfx.birds`).
+- Wind: **no constant wind, no water.** Only short soft whooshes at each scene change and at `sfx.swish` / `sfx.drift` moments.
+- **Knobs (`LEVEL_DB` in song.js, dB):** 피아노 반주 −11.4 · 멜로디 −8.1 · 잔향 −10.9 · 새소리 −0.9 · 바람 −15.2 · 내레이션 0; music dips under the narration by `DUCK` 0.5.
+- Approved film measured: 피아노 반주 −32.1 dB avg · 멜로디 −33.0 · 새소리 −28.1 · 바람 −46.6 · 잔향 −41.7 · total **−30.2 LUFS** (quiet on purpose).
+- Every `node song.js` prints this table (out/sound-levels.md); always show it to the user.
 
 ## Review checklist before rendering
-1. `stills` at the middle of each scene (≈ T(n)+2.5) — check overlaps, clipped words, faces, seams.
+1. `stills` at the middle of each scene — check overlaps, clipped words, faces, seams.
 2. Fix, re-render the same stills.
 3. `video` → `mux` → `check` (contact sheet + loudness).

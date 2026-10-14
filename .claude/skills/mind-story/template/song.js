@@ -1,7 +1,10 @@
-// THE SONG — a soft felt-piano lullaby over a quiet stream, wind and a few far birds.
-//   node song.js            (STEMS=1 also writes out/stem-*.wav, LUFS=-16 sets loudness)
+// THE SONG — a soft felt-piano lullaby, a few far birds, soft wind only when things move, and (optionally) a narration.
+//   node song.js            → out/music.wav + a sound table in dB (also out/sound-levels.md)
+//   LUFS=-24 node song.js   → same balance, everything louder (or quieter) together
+//   STEMS=1 node song.js    → also writes out/stem-*.wav
 const path = require('path');
-const { SR, Bus, reverb, Pink, SVF, OnePole, rng } = require('./engine/audio/dsp');
+const fs = require('fs');
+const { SR, Bus, reverb, OnePole, rng } = require('./engine/audio/dsp');
 const I = require('./engine/audio/instruments');
 const MIX = require('./engine/audio/mix');
 const sc = require('./score');
@@ -9,7 +12,19 @@ const { DURATION, BEAT, m } = sc;
 
 const N = Math.ceil(DURATION * SR);
 const bus = () => new Bus(N);
-const piano = bus(), lead = bus(), nature = bus(), birds = bus(), fx = bus(), verb = bus();
+const piano = bus(), lead = bus(), birds = bus(), fx = bus(), verb = bus();
+
+// ======================= SOUND KNOBS (dB) — the approved mix. "피아노 3dB 낮춰" → piano: -14.4 =======================
+const LEVEL_DB = {
+  piano: -11.4, // 피아노 반주 (one soft note per beat + bass)
+  lead: -8.1, //   멜로디
+  verb: -10.9, //  잔향 (room of the piano and the birds)
+  birds: -0.9, //  새소리
+  fx: -15.2, //    바람 (whooshes on scene changes and when words fly in)
+  voice: 0, //     내레이션 (only when voice-timing.js has a voice)
+};
+const DUCK = 0.5; // how much the music dips under the narration (0 = none, 0.5 ≈ -6 dB)
+// =====================================================================================================================
 const mtof = (n) => 440 * Math.pow(2, (n - 69) / 12);
 
 // ---------- felt piano: warm partials, slow hammer, no hard "ting" ----------
@@ -67,42 +82,7 @@ for (const n of sc.MEL) {
   verb.addMono(x, t, 0.45, 0.12);
 }
 
-// ---------- nature bed: a gentle babbling brook (bubbles, not hiss) ----------
-{
-  const r = rng(5), pk = new Pink(5), lp = new SVF();
-  const L = new Float32Array(N), R = new Float32Array(N);
-  // the brook: many tiny water bubbles, each a short rising sine (Minnaert bubble)
-  const RATE = 55; // bubbles per second
-  for (let tb = 0; tb < DURATION; tb += -Math.log(1 - r() * 0.999) / RATE) {
-    const f0 = 350 * Math.pow(4, r()), dur = 0.025 + r() * 0.05, amp = 0.15 + r() * 0.85;
-    const pan = r() * 1.6 - 0.8, n0 = Math.floor(tb * SR), n = Math.floor(dur * SR);
-    let ph = 0;
-    for (let i = 0; i < n && n0 + i < N; i++) {
-      const u = i / n;
-      ph += (2 * Math.PI * f0 * (1 + 0.9 * u)) / SR;
-      const v = Math.sin(ph) * Math.exp(-u * 4) * Math.min(1, i / 40) * amp;
-      L[n0 + i] += v * (1 - pan) * 0.5; R[n0 + i] += v * (1 + pan) * 0.5;
-    }
-  }
-  for (let i = 0; i < N; i++) {
-    const t = i / SR;
-    const rumble = lp.lp(pk.next(), 380, 0.6) * 0.5; // soft low water body, no hiss
-    const fadeIn = Math.min(1, t / 1.2);
-    L[i] = (L[i] * 0.22 + rumble) * fadeIn;
-    R[i] = (R[i] * 0.22 + rumble) * fadeIn;
-  }
-  nature.addStereo(L, R, 0, 1);
-}
-
-// ---------- wind: only soft whooshes on scene changes and when words / clouds fly in ----------
-const swish = (t, len, gain, f0 = 300, f1 = 1600) => fx.addMono(I.noiseSweep(len, f0, f1, { q: 0.7, pink: true, shape: (x) => Math.sin(Math.PI * x) }), t, gain);
-for (let b = 1; b <= 5; b++) swish(sc.T(b) - 0.35, 0.9, 0.18, 250, 1200); // scene changes
-for (const t of sc.ev.wants) swish(t - 0.05, 0.45, 0.1, 500, 2000); // the three want-clouds pop
-for (const t of sc.ev.lackNodes) swish(t - 0.05, 0.4, 0.08, 500, 1800);
-for (const t of sc.ev.letGo) swish(t, 1.1, 0.12, 900, 300); // balloons drift away
-swish(sc.ev.title, 1.0, 0.1, 400, 1400);
-
-// ---------- birds: a few far, soft chirps (release + final scene) ----------
+// ---------- birds: a few far, soft chirps (times from score.js sfx.birds) ----------
 function chirp(f0, len, seed) {
   const out = new Float32Array(Math.ceil(len * SR));
   let ph = 0;
@@ -116,22 +96,61 @@ function chirp(f0, len, seed) {
   }
   return out;
 }
-const birdTimes = [[sc.T(2, 2.8), 3600, 0.6], [sc.T(2, 3.1), 4100, 0.6], [sc.T(5, 0.9), 3300, -0.5], [sc.T(5, 1.15), 3800, -0.5], [sc.T(5, 1.35), 3500, -0.5], [sc.T(5, 2.7), 4200, 0.4], [sc.T(5, 2.9), 3900, 0.4]];
-birdTimes.forEach(([t, f, pan], i) => { const c = chirp(f, 0.09 + (i % 3) * 0.025, i + 3); birds.addMono(c, t, 0.12, pan); verb.addMono(c, t, 0.06, pan); });
+sc.sfx.birds.forEach(([t, f, pan], i) => { if (t >= DURATION) return; const c = chirp(f, 0.09 + (i % 3) * 0.025, i + 3); birds.addMono(c, t, 0.12, pan); verb.addMono(c, t, 0.06, pan); });
+
+// ---------- wind: only soft whooshes — on every scene change and when words / clouds / things fly ----------
+const swish = (t, len, gain, f0 = 300, f1 = 1600) => { if (t > 0 && t < DURATION) fx.addMono(I.noiseSweep(len, f0, f1, { q: 0.7, pink: true, shape: (x) => Math.sin(Math.PI * x) }), t, gain); };
+sc.starts.slice(1).forEach((t) => swish(t - 0.35, 0.9, 0.18, 250, 1200));
+for (const t of sc.sfx.swish) swish(t - 0.05, 0.45, 0.1, 500, 2000);
+for (const t of sc.sfx.drift) swish(t, 1.1, 0.12, 900, 300);
+
+// ---------- narration (voice mode) ----------
+const stems = { piano, lead, birds, fx };
+if (sc.VT && sc.VT.file) {
+  const v = MIX.loadAudio(path.join(__dirname, sc.VT.file), { length: DURATION });
+  const hp = [new OnePole(), new OnePole()];
+  for (let i = 0; i < N; i++) { v.L[i] -= hp[0].lp(v.L[i], 80); v.R[i] -= hp[1].lp(v.R[i], 80); } // gentle high-pass
+  const voice = bus(); voice.L.set(v.L.subarray(0, N)); voice.R.set(v.R.subarray(0, N));
+  stems.voice = voice;
+}
+stems.verb = reverb(verb, { room: 0.88, damp: 0.45, predelay: 0.02 });
+if (stems.voice) MIX.duck([stems.piano, stems.lead, stems.verb], stems.voice, { depth: DUCK, release: 0.6 });
 
 // ---------- mix ----------
-const stems = {
-  piano, lead, nature, birds, fx,
-  verb: reverb(verb, { room: 0.88, damp: 0.45, predelay: 0.02 }),
-};
-// LOCKED final mix (approved by the user — keep these numbers for every film in this series):
-//   piano accompaniment 0.268, melody 0.394, reverb 0.284, birds 0.9, wind whooshes 0.174, no brook. ≈ -30 LUFS.
-const GAIN = { piano: 0.85 * 0.63 * 0.5, lead: 1.25 * 0.63 * 0.5, nature: 0, // brook removed
-  birds: 0.9, fx: 0.7 * 0.71 * 0.35, verb: 0.9 * 0.63 * 0.5 };
+const GAIN = Object.fromEntries(Object.keys(stems).map((k) => [k, Math.pow(10, LEVEL_DB[k] / 20)]));
 const out = path.join(__dirname, 'out');
+fs.mkdirSync(out, { recursive: true });
 const mix = MIX.mixdown(stems, GAIN, { stemDir: process.env.STEMS ? out : null });
 MIX.highpass(mix, 30);
 MIX.fadeOut(mix, DURATION - 2.2, DURATION);
 const M = MIX.master(mix, parseFloat(process.env.DRIVE || '0.6'), undefined, { lufs: process.env.LUFS ? parseFloat(process.env.LUFS) : null });
 MIX.writeWav(path.join(out, 'music.wav'), mix);
-console.log(`wrote out/music.wav (${DURATION.toFixed(2)}s${M.lufs !== undefined ? `, ${M.lufs.toFixed(1)} LUFS at drive ${M.drive.toFixed(2)}` : ''})`);
+
+// ---------- the sound table (numbers the user can steer by: "바람 3dB 낮춰") ----------
+const NAMES = { piano: '피아노 반주', lead: '멜로디', verb: '잔향', birds: '새소리', fx: '바람', voice: '내레이션' };
+function level(b, g) { // active RMS: only the 50 ms windows where the sound is actually playing
+  const w = Math.round(0.05 * SR); let s = 0, n = 0, pk = 0;
+  for (let i0 = 0; i0 + w <= b.n; i0 += w) {
+    let ws = 0;
+    for (let i = i0; i < i0 + w; i++) { const x = (b.L[i] + b.R[i]) * 0.5 * g; ws += x * x; pk = Math.max(pk, Math.abs(b.L[i] * g), Math.abs(b.R[i] * g)); }
+    if (ws / w > 1e-6) { s += ws; n += w; } // above -60 dB
+  }
+  const db = (x) => (x > 1e-9 ? 20 * Math.log10(x) : -Infinity);
+  return { rms: n ? db(Math.sqrt(s / n)) : -Infinity, peak: db(pk) };
+}
+const f1 = (x) => (Number.isFinite(x) ? x.toFixed(1) : '없음');
+const rowsOut = Object.keys(stems).map((k) => { const L = level(stems[k], GAIN[k]); return `| ${NAMES[k]} | ${LEVEL_DB[k].toFixed(1)} dB | ${f1(L.rms)} dB | ${f1(L.peak)} dB |`; });
+const loud = MIX.lufs(mix);
+const table = [
+  `소리 크기 표 (${DURATION.toFixed(1)}초)`,
+  '',
+  '| 소리 | 설정값 | 들리는 크기 (평균) | 가장 큰 순간 |',
+  '|---|---|---|---|',
+  ...rowsOut,
+  '',
+  `전체 음량: ${loud.toFixed(1)} LUFS  (유튜브 기준 -14, 지금처럼 잔잔한 버전 ≈ -30)`,
+  '조절 가이드: 3dB = 살짝 · 6dB = 절반 느낌 · 10dB = 많이.  예) "바람 3dB 낮춰", "전체 6dB 올려"',
+].join('\n');
+fs.writeFileSync(path.join(out, 'sound-levels.md'), table + '\n');
+console.log(`wrote out/music.wav (${DURATION.toFixed(2)}s${M.lufs !== undefined ? `, ${M.lufs.toFixed(1)} LUFS at drive ${M.drive.toFixed(2)}` : ''})\n`);
+console.log(table);
