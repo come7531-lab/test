@@ -2,13 +2,14 @@
 //   node song.js            (STEMS=1 also writes out/stem-*.wav, LUFS=-16 sets loudness)
 const path = require('path');
 const { SR, Bus, reverb, Pink, SVF, OnePole, rng } = require('./engine/audio/dsp');
+const I = require('./engine/audio/instruments');
 const MIX = require('./engine/audio/mix');
 const sc = require('./score');
 const { DURATION, BEAT, m } = sc;
 
 const N = Math.ceil(DURATION * SR);
 const bus = () => new Bus(N);
-const piano = bus(), lead = bus(), nature = bus(), birds = bus(), verb = bus();
+const piano = bus(), lead = bus(), nature = bus(), birds = bus(), fx = bus(), verb = bus();
 const mtof = (n) => 440 * Math.pow(2, (n - 69) / 12);
 
 // ---------- felt piano: warm partials, slow hammer, no hard "ting" ----------
@@ -66,24 +67,40 @@ for (const n of sc.MEL) {
   verb.addMono(x, t, 0.45, 0.12);
 }
 
-// ---------- nature bed: a small stream + soft wind ----------
+// ---------- nature bed: a gentle babbling brook (bubbles, not hiss) ----------
 {
-  const pk = new Pink(5), pk2 = new Pink(9), bp = new SVF(), bp2 = new SVF(), lp = new SVF();
+  const r = rng(5), pk = new Pink(5), lp = new SVF();
   const L = new Float32Array(N), R = new Float32Array(N);
+  // the brook: many tiny water bubbles, each a short rising sine (Minnaert bubble)
+  const RATE = 55; // bubbles per second
+  for (let tb = 0; tb < DURATION; tb += -Math.log(1 - r() * 0.999) / RATE) {
+    const f0 = 350 * Math.pow(4, r()), dur = 0.025 + r() * 0.05, amp = 0.15 + r() * 0.85;
+    const pan = r() * 1.6 - 0.8, n0 = Math.floor(tb * SR), n = Math.floor(dur * SR);
+    let ph = 0;
+    for (let i = 0; i < n && n0 + i < N; i++) {
+      const u = i / n;
+      ph += (2 * Math.PI * f0 * (1 + 0.9 * u)) / SR;
+      const v = Math.sin(ph) * Math.exp(-u * 4) * Math.min(1, i / 40) * amp;
+      L[n0 + i] += v * (1 - pan) * 0.5; R[n0 + i] += v * (1 + pan) * 0.5;
+    }
+  }
   for (let i = 0; i < N; i++) {
     const t = i / SR;
-    // stream: band-limited noise whose centre wanders like moving water
-    const wob = 1400 + 500 * Math.sin(t * 2.3) + 350 * Math.sin(t * 5.1 + 1) + 250 * Math.sin(t * 9.7);
-    const st = bp.bp(pk.next(), wob, 1.6) * (0.55 + 0.25 * Math.sin(t * 3.7) + 0.2 * Math.sin(t * 11.3));
-    const st2 = bp2.bp(pk.next(), wob * 1.8, 2.2) * 0.4;
-    // wind: slow swells, low
-    const wind = lp.lp(pk2.next(), 500 + 200 * Math.sin(t * 0.4), 0.7) * (0.5 + 0.5 * Math.sin(t * 0.31 + 2));
+    const rumble = lp.lp(pk.next(), 380, 0.6) * 0.5; // soft low water body, no hiss
     const fadeIn = Math.min(1, t / 1.2);
-    L[i] = (st * 0.8 + st2 * 0.6 + wind * 0.9) * fadeIn;
-    R[i] = (st * 0.6 + st2 * 0.8 + wind * 0.8) * fadeIn;
+    L[i] = (L[i] * 0.22 + rumble) * fadeIn;
+    R[i] = (R[i] * 0.22 + rumble) * fadeIn;
   }
   nature.addStereo(L, R, 0, 1);
 }
+
+// ---------- wind: only soft whooshes on scene changes and when words / clouds fly in ----------
+const swish = (t, len, gain, f0 = 300, f1 = 1600) => fx.addMono(I.noiseSweep(len, f0, f1, { q: 0.7, pink: true, shape: (x) => Math.sin(Math.PI * x) }), t, gain);
+for (let b = 1; b <= 5; b++) swish(sc.T(b) - 0.35, 0.9, 0.18, 250, 1200); // scene changes
+for (const t of sc.ev.wants) swish(t - 0.05, 0.45, 0.1, 500, 2000); // the three want-clouds pop
+for (const t of sc.ev.lackNodes) swish(t - 0.05, 0.4, 0.08, 500, 1800);
+for (const t of sc.ev.letGo) swish(t, 1.1, 0.12, 900, 300); // balloons drift away
+swish(sc.ev.title, 1.0, 0.1, 400, 1400);
 
 // ---------- birds: a few far, soft chirps (release + final scene) ----------
 function chirp(f0, len, seed) {
@@ -104,10 +121,10 @@ birdTimes.forEach(([t, f, pan], i) => { const c = chirp(f, 0.09 + (i % 3) * 0.02
 
 // ---------- mix ----------
 const stems = {
-  piano, lead, nature, birds,
+  piano, lead, nature, birds, fx,
   verb: reverb(verb, { room: 0.88, damp: 0.45, predelay: 0.02 }),
 };
-const GAIN = { piano: 0.85, lead: 1.25, nature: 0.26, birds: 0.9, verb: 0.9 };
+const GAIN = { piano: 0.85, lead: 1.25, nature: 0.13, birds: 0.9, fx: 0.7, verb: 0.9 };
 const out = path.join(__dirname, 'out');
 const mix = MIX.mixdown(stems, GAIN, { stemDir: process.env.STEMS ? out : null });
 MIX.highpass(mix, 30);
