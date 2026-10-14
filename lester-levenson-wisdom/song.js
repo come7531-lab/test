@@ -61,7 +61,7 @@ for (const c of sc.chords) {
   verb.addMono(x, c.t0, 0.2);
 }
 for (const n of sc.MEL) {
-  const x = softPiano(n.midi, n.dur, 0.62, Math.round(n.t * 10) + 3);
+  const x = softPiano(n.midi, n.dur, 0.45, Math.round(n.t * 10) + 3);
   const t = n.t + 0.012; // melody leans just behind the beat
   lead.addMono(x, t, 0.6, 0.12);
   verb.addMono(x, t, 0.45, 0.12);
@@ -124,8 +124,8 @@ const stems = {
   piano, lead, nature, birds, fx,
   verb: reverb(verb, { room: 0.88, damp: 0.45, predelay: 0.02 }),
 };
-const GAIN = { piano: 0.85 * 0.63 * 0.5, lead: 1.25 * 0.63, nature: 0, // brook removed
-  birds: 0.9, fx: 0.7 * 0.71 * 0.35, verb: 0.9 * 0.63 };
+const GAIN = { piano: 0.85 * 0.63 * 0.5, lead: 1.25 * 0.63 * 0.5, nature: 0, // brook removed
+  birds: 0.9, fx: 0.7 * 0.71 * 0.35, verb: 0.9 * 0.63 * 0.5 };
 const out = path.join(__dirname, 'out');
 const mix = MIX.mixdown(stems, GAIN, { stemDir: process.env.STEMS ? out : null });
 MIX.highpass(mix, 30);
