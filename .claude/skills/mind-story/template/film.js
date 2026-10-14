@@ -536,8 +536,8 @@
   Studio.film({
     async init() {
       await Studio.loadFont('Gaegu', 'fonts/Gaegu-Bold.ttf', '700');
-      await Studio.loadFont('Gaegu', 'fonts/Gaegu-Regular.ttf', '400');
-      await Studio.loadFont('NanumPen', 'fonts/NanumPenScript-Regular.ttf', '400');
+      // (only Gaegu Bold is used; the regular weight and Nanum Pen are optional fallbacks)
+      for (const [f, src, w] of [['Gaegu', 'fonts/Gaegu-Regular.ttf', '400'], ['NanumPen', 'fonts/NanumPenScript-Regular.ttf', '400']]) { try { await Studio.loadFont(f, src, w); } catch (e) { /* optional */ } }
       // wax grain: tiny diagonal flecks of paper
       const c = G.makeCanvas(256, 256), x = c.getContext('2d');
       const r = U.mulberry32(42);
