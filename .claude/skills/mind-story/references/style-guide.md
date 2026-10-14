@@ -48,6 +48,11 @@ Every new film must keep these. Only the story, drawings, words and timings chan
 - Mouth curves: `curve(a, b, +bend)` is a smile, negative a frown.
 - Hair is a filled `hairCap`, not a line (a line reads as a unibrow).
 
+## Fonts and copyright (always)
+- Hand lettering and subtitles use **Gaegu Bold** only (`template/fonts/Gaegu-Bold.ttf`, SIL Open Font License 1.1 → free for commercial videos, YouTube included; license in `template/fonts/OFL-Gaegu.txt`).
+- Never use a font without a free commercial licence. If another hand-written font is wanted, pick only from Google Fonts' OFL Korean hand fonts (e.g. Nanum Pen Script, Gamja Flower, Hi Melody, Poor Story), put the .ttf **and its OFL.txt** in `fonts/`, and tell the user the licence.
+- All drawings, music and sound effects are made by the code itself, so there are no stock images or music to license.
+
 ## Subtitles
 - Bottom centre, Gaegu Bold 56 px, ink colour, on a rounded cream box `rgba(251,245,232,0.88)` with a thin crayon border; fade + small rise in 0.3 s.
 - One sentence per scene (`sub` in score.js SCENES), polite 해요/합니다 tone. Without narration it shows from the scene start +0.2 s to its end −0.2 s; with narration it follows the spoken sentence. Lines wider than 86% of the frame wrap into two.
