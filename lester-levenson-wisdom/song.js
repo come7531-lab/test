@@ -124,6 +124,8 @@ const stems = {
   piano, lead, nature, birds, fx,
   verb: reverb(verb, { room: 0.88, damp: 0.45, predelay: 0.02 }),
 };
+// LOCKED final mix (approved by the user — keep these numbers for every film in this series):
+//   piano accompaniment 0.268, melody 0.394, reverb 0.284, birds 0.9, wind whooshes 0.174, no brook. ≈ -30 LUFS.
 const GAIN = { piano: 0.85 * 0.63 * 0.5, lead: 1.25 * 0.63 * 0.5, nature: 0, // brook removed
   birds: 0.9, fx: 0.7 * 0.71 * 0.35, verb: 0.9 * 0.63 * 0.5 };
 const out = path.join(__dirname, 'out');

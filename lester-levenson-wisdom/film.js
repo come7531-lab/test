@@ -7,6 +7,7 @@
   const W = G.W, H = G.H;
   const H1 = (...a) => U.hash(...a);
 
+  // ======================= STYLE TOOLKIT — keep as is (palette, crayon fill/line, words, arrows, person) =======================
   // ---------- palette (crayon box) ----------
   const C = {
     paper: '#F7F0E1', ink: '#4A3B33', inkSoft: '#6B5A4E',
@@ -236,6 +237,7 @@
     return { handR: [x + hands[1][0] * s, y + ((sit ? -40 : -88) + hands[1][1]) * s], chest: [x, y + ((sit ? -40 : -88) - 64) * s] };
   }
 
+  // ======================= PER-FILM PART — backgrounds and scenes: rewrite these for each new story =======================
   // ---------- full-frame crayon backgrounds (cached; they are fully coloured from the first frame) ----------
   const vgrad = (ctx, stops) => { const g = ctx.createLinearGradient(0, 0, 0, H); for (const [y, c] of stops) g.addColorStop(clamp(y / H), c); return g; };
   const FULL = (y0, y1) => [[-20, y0], [W + 20, y0], [W + 20, y1], [-20, y1]];
@@ -509,6 +511,7 @@
 
   const SCENES = [['want', sceneWant], ['lack', sceneLack], ['release', sceneRelease], ['within', sceneWithin], ['graph', sceneGraph], ['free', sceneFree]];
 
+  // ======================= STYLE TOOLKIT again — subtitles + scene cross-fade runner: keep as is =======================
   // ---------- subtitles (outside the camera, bottom centre) ----------
   function subtitle(ctx, t) {
     for (const s of S.subtitles) {
