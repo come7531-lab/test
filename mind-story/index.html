@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f7f0e1">
+  <title>여행에서 배우는 인생의 행복 · 30초 마음 영상</title>
+  <meta name="description" content="인생도 여행처럼. 후회와 걱정을 내려놓고 지금의 작은 것에 감사하는 30초 크레파스 마음 영상.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="여행에서 배우는 인생의 행복">
+  <meta property="og:description" content="내려놓고 즐기는 지금, 진짜 행복. 30초 크레파스 마음 영상.">
+  <meta property="og:image" content="https://come7531-lab.github.io/test/mind-story/poster.webp">
+  <meta property="og:url" content="https://come7531-lab.github.io/test/mind-story/">
+  <link rel="canonical" href="https://come7531-lab.github.io/test/mind-story/">
+  <style>
+    :root{color-scheme:light;--paper:#f7f0e1;--ink:#4a3b33;--muted:#75665b;--teal:#396f67;--line:#d9ccb8}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif;line-height:1.65}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 10% 0%,#f6c9a844,transparent 55%),radial-gradient(ellipse at 100% 100%,#afc8da33,transparent 55%);z-index:-1}
+    main{max-width:940px;margin:0 auto;padding:52px 24px 38px}header{text-align:center;margin-bottom:30px}.eyebrow{font-size:12px;letter-spacing:.16em;font-weight:750;color:var(--teal);margin:0 0 18px}
+    h1{font-size:clamp(32px,5.7vw,52px);line-height:1.28;letter-spacing:-.045em;margin:0;font-weight:800}h1 span{display:block;font-size:.58em;font-weight:650;margin-bottom:9px;letter-spacing:-.02em}.intro{font-size:15px;color:var(--muted);margin:18px 0 0}
+    .frame{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#e7dfd0;box-shadow:0 14px 35px #5e493312}video{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#e7dfd0;object-fit:contain}.caption{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);padding:13px 4px 0}
+    .note{text-align:center;font-size:17px;font-weight:500;line-height:1.85;margin:30px 0 26px}.note span{display:block}.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}button,.download{font:inherit;font-size:14px;font-weight:650;min-height:48px;padding:12px 21px;border-radius:12px;border:1px solid var(--line);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:9px;background:transparent;color:var(--ink)}button{background:var(--teal);color:white;border-color:var(--teal)}button:hover{background:#2f615a}.download:hover{background:#ffffff55}button:focus-visible,.download:focus-visible{outline:3px solid #ee8c78;outline-offset:4px}.toast{text-align:center;min-height:24px;font-size:13px;color:var(--teal);margin:12px 0 0}.fallback{font-size:13px;color:var(--muted);text-align:center;margin:18px 0 0}.fallback a{color:var(--teal);text-underline-offset:3px}footer{text-align:center;font-size:11px;color:var(--muted);margin-top:34px;padding-top:22px;border-top:1px solid var(--line)}svg{width:17px;height:17px}
+    @media(max-width:540px){main{padding:34px 18px 26px}header{margin-bottom:24px}.intro{font-size:13px;margin-top:14px}.frame{border-radius:13px}.note{font-size:15px;margin:25px 0 22px}.actions{gap:9px}button,.download{font-size:13px;padding:11px 17px}.caption{font-size:11px}footer{line-height:1.9}}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">MIND STORY · 30초 마음공부</p>
+      <h1><span>여행에서 배우는</span>인생의 행복</h1>
+      <p class="intro">인생도, 매일을 여행하듯 살아봐요.</p>
+    </header>
+    <div class="frame">
+      <video id="film" controls playsinline preload="metadata" poster="poster.webp" aria-label="여행에서 배우는 인생의 행복, 30초 영상">
+        <source src="happiness.mp4" type="video/mp4">
+        <a href="happiness.mp4">영상 파일 열기</a>
+      </video>
+    </div>
+    <div class="caption"><span>크레파스 손그림 · 잔잔한 피아노</span><span>30초</span></div>
+    <p class="note"><span>후회와 걱정을 잠시 내려놓고,</span><span>지금의 작은 것에 감사해요.</span></p>
+    <div class="actions">
+      <button type="button" id="share"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"/></svg>친구에게 공유</button>
+      <a class="download" href="happiness.mp4" download="여행에서_배우는_인생의_행복.mp4">영상 저장</a>
+    </div>
+    <p class="toast" id="message" role="status" aria-live="polite"></p>
+    <p class="fallback">재생이 어려우면 <a href="happiness.mp4">영상 파일을 직접 열어보세요.</a></p>
+    <footer>레스터 레븐슨 · 에크하르트 톨레의 가르침에서 영감을 얻은 마음 영상</footer>
+  </main>
+  <script>
+    const message=document.getElementById('message');
+    document.getElementById('share').addEventListener('click',async()=>{
+      const url=new URL('./',location.href).href;
+      try{
+        if(navigator.share){await navigator.share({title:'여행에서 배우는 인생의 행복',text:'잠시 내려놓고, 지금의 작은 행복을 만나는 30초 영상이에요.',url});}
+        else if(navigator.clipboard){await navigator.clipboard.writeText(url);message.textContent='링크를 복사했어요. 친구에게 붙여넣어 보내세요.';}
+        else{message.textContent=url;}
+      }catch(error){if(error.name!=='AbortError')message.textContent='주소창의 링크를 복사해 친구에게 보내주세요.';}
+    });
+    document.getElementById('film').addEventListener('error',()=>{message.textContent='아래의 영상 파일 직접 열기를 눌러주세요.';});
+  </script>
+</body>
+</html>
