@@ -1,9 +1,9 @@
 ---
-name: crayon-wisdom-film
-description: Make a 20-second hand-drawn pastel crayon video (손그림 크레파스 영상) that explains a book's or teacher's core wisdom in six full-frame drawn scenes with hand-written Korean words, diagram arrows, zoom-in/zoom-out camera, bottom subtitles, a soft felt-piano score, far birds and gentle wind whooshes on transitions — exactly the approved "레스터 레븐슨의 지혜" style. Use when the user asks for "크레파스 손그림 영상", "지혜 영상", "그 스타일로 영상", a new episode of this series, or invokes /crayon-wisdom-film with a topic.
+name: mind-story
+description: Make a 20-second hand-drawn pastel crayon video (손그림 크레파스 영상) that explains a book's or teacher's core wisdom in six full-frame drawn scenes with hand-written Korean words, diagram arrows, zoom-in/zoom-out camera, bottom subtitles, a soft felt-piano score, far birds and gentle wind whooshes on transitions — exactly the approved "레스터 레븐슨의 지혜" style. Use when the user asks for "크레파스 손그림 영상", "지혜 영상", "그 스타일로 영상", a new episode of this series, or invokes /mind-story with a topic.
 ---
 
-# Crayon Wisdom Film
+# Mind Story (크레파스 마음 영상)
 
 Builds a new episode of the user's series in the **locked style** of the approved first film
 (`template/` is that exact film, working end to end). Only the story changes; the look and the sound stay.
@@ -30,7 +30,7 @@ Write a 6-row plan: picture · hand-written key words · diagram device · subti
 
 ### 3. Scaffold
 ```bash
-sh .claude/skills/crayon-wisdom-film/scripts/new-film.sh <kebab-case-topic>
+sh .claude/skills/mind-story/scripts/new-film.sh <kebab-case-topic>
 ```
 (in the user's repo root unless they name a place). It copies the template and writes `out/chrome.sh`
 (Chromium with `--no-sandbox`). Run every later command as

@@ -1,6 +1,6 @@
 #!/bin/sh
 # Scaffold a new crayon wisdom film from the approved template.
-#   sh .claude/skills/crayon-wisdom-film/scripts/new-film.sh <target-dir>
+#   sh .claude/skills/mind-story/scripts/new-film.sh <target-dir>
 # Also writes a Chromium wrapper (headless Chrome must run with --no-sandbox as root in cloud sessions).
 set -e
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
