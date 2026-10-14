@@ -14,7 +14,9 @@ const N = Math.ceil(DURATION * SR);
 const bus = () => new Bus(N);
 const piano = bus(), lead = bus(), birds = bus(), fx = bus(), verb = bus();
 
-// ======================= SOUND KNOBS (dB) — the approved mix. "피아노 3dB 낮춰" → piano: -14.4 =======================
+// ======================= SOUND KNOBS (dB, internal) — the approved mix =======================
+// The user speaks in VOLUME numbers (the table at the end: volume = 100 + measured dB, 1 step = 1 dB).
+// "바람 3 낮춰" → fx -3 · "피아노 반주 62로" (now 68) → piano -6 · "전체 80으로" (now 70) → LUFS=<now-100+10>
 const LEVEL_DB = {
   piano: -11.4, // 피아노 반주 (one soft note per beat + bass)
   lead: -8.1, //   멜로디
@@ -126,31 +128,41 @@ MIX.fadeOut(mix, DURATION - 2.2, DURATION);
 const M = MIX.master(mix, parseFloat(process.env.DRIVE || '0.6'), undefined, { lufs: process.env.LUFS ? parseFloat(process.env.LUFS) : null });
 MIX.writeWav(path.join(out, 'music.wav'), mix);
 
-// ---------- the sound table (numbers the user can steer by: "바람 3dB 낮춰") ----------
-const NAMES = { piano: '피아노 반주', lead: '멜로디', verb: '잔향', birds: '새소리', fx: '바람', voice: '내레이션' };
-function level(b, g) { // active RMS: only the 50 ms windows where the sound is actually playing
-  const w = Math.round(0.05 * SR); let s = 0, n = 0, pk = 0;
-  for (let i0 = 0; i0 + w <= b.n; i0 += w) {
-    let ws = 0;
-    for (let i = i0; i < i0 + w; i++) { const x = (b.L[i] + b.R[i]) * 0.5 * g; ws += x * x; pk = Math.max(pk, Math.abs(b.L[i] * g), Math.abs(b.R[i] * g)); }
-    if (ws / w > 1e-6) { s += ws; n += w; } // above -60 dB
-  }
-  const db = (x) => (x > 1e-9 ? 20 * Math.log10(x) : -Infinity);
-  return { rms: n ? db(Math.sqrt(s / n)) : -Infinity, peak: db(pk) };
+// ---------- the sound table — shown as VOLUME (like a phone): bigger number = louder, 1 step = 1 dB ----------
+// volume = 100 + measured dB (100 = the loudest a file can hold). The user steers with these numbers; the knobs above stay in dB.
+const NAMES = { piano: '피아노 반주', lead: '멜로디', verb: '잔향(울림)', birds: '새소리', fx: '바람', voice: '내레이션' };
+function level(b, g) { // the average while the sound is actually playing: 50 ms windows within 40 dB of its loudest moment
+  const w = Math.round(0.05 * SR), E = [];
+  for (let i0 = 0; i0 + w <= b.n; i0 += w) { let ws = 0; for (let i = i0; i < i0 + w; i++) { const x = (b.L[i] + b.R[i]) * 0.5; ws += x * x; } E.push(ws / w); }
+  const mx = Math.max(0, ...E), on = E.filter((e) => e > mx * 1e-4 && e > 1e-14);
+  return on.length ? 20 * Math.log10(Math.sqrt(on.reduce((a, e) => a + e, 0) / on.length) * g) : -Infinity; // scales exactly with the knob
 }
-const f1 = (x) => (Number.isFinite(x) ? x.toFixed(1) : '없음');
-const rowsOut = Object.keys(stems).map((k) => { const L = level(stems[k], GAIN[k]); return `| ${NAMES[k]} | ${LEVEL_DB[k].toFixed(1)} dB | ${f1(L.rms)} dB | ${f1(L.peak)} dB |`; });
-const loud = MIX.lufs(mix);
+const vol = (db) => (Number.isFinite(db) ? Math.max(0, Math.round(100 + db)) : 0);
+const now = Object.fromEntries(Object.keys(stems).map((k) => [k, vol(level(stems[k], GAIN[k]))]));
+now.total = vol(MIX.lufs(mix));
+const prevFile = path.join(out, 'sound-levels.json');
+let prev = null;
+try { prev = JSON.parse(fs.readFileSync(prevFile, 'utf8')); } catch (e) { prev = null; }
+const bar = (v) => '█'.repeat(Math.max(0, Math.round(v / 2)));
+const change = (k) => { if (!prev || prev[k] === undefined || prev[k] === now[k]) return ''; const d = now[k] - prev[k]; return `${prev[k]} → ${now[k]} (${d > 0 ? '+' : ''}${d})`; };
+const order = Object.keys(stems).sort((a, b) => now[b] - now[a]);
 const table = [
-  `소리 크기 표 (${DURATION.toFixed(1)}초)`,
+  `소리 볼륨 표 (${DURATION.toFixed(1)}초) — 숫자가 클수록 큰 소리 · 1칸 = 살짝 차이`,
   '',
-  '| 소리 | 설정값 | 들리는 크기 (평균) | 가장 큰 순간 |',
+  '| 소리 | 볼륨 | 느낌 | 바뀐 것 |',
   '|---|---|---|---|',
-  ...rowsOut,
+  ...order.map((k) => `| ${NAMES[k]} | **${now[k]}** | ${bar(now[k])} | ${change(k)} |`),
+  `| **전체 음량** | **${now.total}** | (유튜브 보통 영상 ≈ 86) | ${change('total')} |`,
   '',
-  `전체 음량: ${loud.toFixed(1)} LUFS  (유튜브 기준 -14, 지금처럼 잔잔한 버전 ≈ -30)`,
-  '조절 가이드: 3dB = 살짝 · 6dB = 절반 느낌 · 10dB = 많이.  예) "바람 3dB 낮춰", "전체 6dB 올려"',
+  '체감: 3칸 = 살짝 · 6칸 = 절반 느낌 · 10칸 = 확 작게.  예) "바람 3 낮춰", "피아노 반주 62로", "전체 80으로"',
+  '',
+  '유튜브 기준 (전체 음량, 대략):',
+  '  · 86 = 유튜브 보통 영상. 유튜브는 86보다 큰 영상은 86으로 줄이고, 작은 영상은 키워 주지 않아요.',
+  '  · 76~80 = 명상·수면·잔잔한 음악 채널에서 흔한 크기',
+  `  · ${now.total} = 지금 이 영상${now.total < 80 ? ' (다른 영상 뒤에 나오면 작게 느껴질 수 있어요)' : ''}`,
+  '  · 내레이션이 있으면: 배경 음악은 목소리보다 15~20칸 아래가 보통 (목소리가 또렷하게 들림)',
 ].join('\n');
+fs.writeFileSync(prevFile, JSON.stringify(now));
 fs.writeFileSync(path.join(out, 'sound-levels.md'), table + '\n');
-console.log(`wrote out/music.wav (${DURATION.toFixed(2)}s${M.lufs !== undefined ? `, ${M.lufs.toFixed(1)} LUFS at drive ${M.drive.toFixed(2)}` : ''})\n`);
+console.log(`wrote out/music.wav (${DURATION.toFixed(2)}s)\n`);
 console.log(table);

@@ -1,6 +1,6 @@
 ---
 name: mind-story
-description: Make a hand-drawn pastel crayon video (손그림 크레파스 마음 영상) that explains a book's, teacher's or script's message in full-frame drawn scenes with hand-written Korean words, diagram arrows, zoom-in/zoom-out camera, bottom subtitles, a soft felt-piano score, far birds and soft wind only on transitions — exactly the approved "레스터 레븐슨의 지혜" style. Any length (follows the script or the narration), script-first mode, narration (voice file) mode, 16:9 or vertical 9:16 Shorts/Reels, and a dB sound table on every delivery. Use when the user asks for "크레파스 손그림 영상", "마음 영상", "지혜 영상", "그 스타일로 영상", a new episode of this series, sends a script or a voice file for it, or invokes /mind-story.
+description: Make a hand-drawn pastel crayon video (손그림 크레파스 마음 영상) that explains a book's, teacher's or script's message in full-frame drawn scenes with hand-written Korean words, diagram arrows, zoom-in/zoom-out camera, bottom subtitles, a soft felt-piano score, far birds and soft wind only on transitions — exactly the approved "레스터 레븐슨의 지혜" style. Any length (follows the script or the narration), script-first mode, narration (voice file) mode, 16:9 or vertical 9:16 Shorts/Reels, and a volume table (bigger number = louder) on every delivery. Use when the user asks for "크레파스 손그림 영상", "마음 영상", "지혜 영상", "그 스타일로 영상", a new episode of this series, sends a script or a voice file for it, or invokes /mind-story.
 ---
 
 # Mind Story (크레파스 마음 영상)
@@ -78,35 +78,40 @@ node engine/render.js mux       # → out/<dir>.mp4
 node engine/render.js check     # contact sheet + loudness
 ```
 
-## 5. Sound in numbers (every delivery)
-- **Always** paste the sound table that `node song.js` prints (also saved in `out/sound-levels.md`) into the reply. Show it with the video, and again after every sound change.
-- Columns:
-  - 설정값: the knob
-  - 들리는 크기: active average, in dBFS
-  - 가장 큰 순간: the peak
-  - Then the total LUFS.
-- The user steers with numbers. Map their words to the knobs in `song.js` `LEVEL_DB`:
+## 5. Sound as VOLUME numbers (every delivery)
+The user does not want dB. Talk only in **볼륨 numbers**: bigger = louder, like a phone. The dB maths stays with you.
+- **Volume** = 100 + the sound's measured average level in dB. 1 step = 1 dB.
+  - 3 steps = 살짝 · 6 = 절반 느낌 · 10 = 확 작게.
+  - The total uses LUFS: total volume = 100 + LUFS, so YouTube's normal level (−14 LUFS) = **86**.
+- **Always** paste the volume table that `node song.js` prints (also saved in `out/sound-levels.md`).
+  - It shows each sound's volume with a bar, the total, and a "바뀐 것" column (before → after, from `out/sound-levels.json`).
+  - It also shows the YouTube reference lines.
+  - Never show dB to the user unless they ask.
+- **Mapping requests to the dB knobs** in `song.js` `LEVEL_DB`. The measured volume moves exactly with the knob.
 
   | 사용자가 하는 말 | knob |
   |---|---|
-  | 피아노 / 반주 | `piano` |
+  | 피아노 반주 | `piano` |
   | 멜로디 | `lead` |
+  | 피아노 전체 | both `piano` and `lead` |
   | 잔향 / 울림 | `verb` |
   | 새소리 | `birds` |
   | 바람 / 효과음 | `fx` |
   | 내레이션 / 목소리 | `voice` |
   | 음악이 목소리 아래로 깔리는 정도 | `DUCK` (0–0.9) |
 
-- "X 3dB 낮춰" → subtract 3 from that knob. "피아노 전체" → both `piano` and `lead`.
-- "전체 6dB 올려/낮춰" → `LUFS=<current ± 6> node song.js` (same balance, all louder or quieter). Report the new LUFS.
-- Percent requests: 50% ≈ −6 dB, 35% ≈ −9 dB, 70% ≈ −3 dB. Say the dB you applied.
-- **Sound-only change:** edit `song.js`, run `node song.js`, then `node engine/render.js mux`. This re-uses `out/video.mp4`; never re-render the picture for a sound change. Reply with a before → after table.
-- If a new default should stick for future films, also update the knob in the skill's `template/song.js` and its style guide, and tell the user to re-upload the skill zip.
+  - "X 3 낮춰 / 올려" → knob −3 / +3.
+  - "X 62로" → knob += 62 − current volume.
+  - "X를 Y랑 같게" → knob += vol(Y) − vol(X).
+  - "50%로" ≈ −6 · "35%" ≈ −9 · "70%" ≈ −3.
+  - "전체 80으로" / "전체 6 올려" → `LUFS=<target − 100> node song.js`. This keeps the balance and moves everything together; `LUFS` stays set for later runs in this film.
+- **Sound-only change:** edit `song.js`, run `node song.js`, then `node engine/render.js mux`. This re-uses `out/video.mp4`; never re-render the picture for a sound change. Reply with the table: its "바뀐 것" column shows before → after.
+- If a new default should stick for future films, also update the knob in the skill's `template/song.js` and the style guide, and tell the user to re-upload the skill zip.
 
 ## 6. Deliver
 - Send `out/<dir>.mp4`.
 - List the scenes with their subtitles.
-- Paste the sound table.
+- Paste the volume table.
 - Say the audio was checked by measurement, not by ear.
 - Offer: 세로(9:16) 버전, 길이 조정, 내레이션 추가.
 - Commit or push only if the session's instructions say so.

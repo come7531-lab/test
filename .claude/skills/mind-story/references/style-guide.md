@@ -49,8 +49,8 @@ Every new film must keep these. Only the story, drawings, words and timings chan
 - Reverb room 0.88 damp 0.45. Birds: a few far chirps (score.js `sfx.birds`).
 - Wind: **no constant wind, no water.** Only short soft whooshes at each scene change and at `sfx.swish` / `sfx.drift` moments.
 - **Knobs (`LEVEL_DB` in song.js, dB):** 피아노 반주 −11.4 · 멜로디 −8.1 · 잔향 −10.9 · 새소리 −0.9 · 바람 −15.2 · 내레이션 0; music dips under the narration by `DUCK` 0.5.
-- Approved film measured: 피아노 반주 −32.1 dB avg · 멜로디 −33.0 · 새소리 −28.1 · 바람 −46.6 · 잔향 −41.7 · total **−30.2 LUFS** (quiet on purpose).
-- Every `node song.js` prints this table (out/sound-levels.md); always show it to the user.
+- Approved film as **volume numbers** (shown to the user; volume = 100 + measured dB): 새소리 72 · 피아노 반주 68 · 멜로디 67 · 잔향 58 · 바람 53 · 전체 **70** (YouTube normal = 86; quiet on purpose).
+- Every `node song.js` prints this volume table (out/sound-levels.md); always show it, never dB.
 
 ## Review checklist before rendering
 1. `stills` at the middle of each scene — check overlaps, clipped words, faces, seams.
