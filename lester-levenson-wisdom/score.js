@@ -48,13 +48,13 @@
     ['E5', 5, 0, 4],
   ].map(([n, bar, beat, d]) => ({ t: T(bar, beat), dur: d * BEAT, midi: m(n) }));
 
-  // broken-chord arpeggio: 8ths, low → high → back, quieter on the offbeats
+  // broken-chord arpeggio: one soft note per beat
   const arp = [];
   for (const c of chords) {
     const notes = c.notes;
-    const order = [0, 1, 2, 3, 2, 1, 2, 3];
-    const steps = Math.round((c.t1 - c.t0) / (BEAT / 2));
-    for (let s = 0; s < steps; s++) arp.push({ t: c.t0 + (s * BEAT) / 2, midi: notes[order[s % 8]], vel: s % 2 ? 0.5 : 0.7 });
+    const order = [0, 2, 1, 3];
+    const steps = Math.round((c.t1 - c.t0) / BEAT); // calm quarter notes, not busy 8ths
+    for (let s = 0; s < steps; s++) arp.push({ t: c.t0 + s * BEAT, midi: notes[order[s % 4]], vel: s % 2 ? 0.4 : 0.5 });
   }
 
   // ---------- picture events (all inside their scene) ----------

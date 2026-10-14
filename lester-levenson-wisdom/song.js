@@ -22,14 +22,14 @@ function softPiano(midi, dur, vel = 0.6, seed = 1) {
   const baseTau = 2.8 * Math.pow(261 / f, 0.35);
   const bright = 0.75 + (1 - vel) * 0.7; // softer touch = darker
   const parts = [];
-  for (let k = 1; k <= 9; k++) {
+  for (let k = 1; k <= 6; k++) {
     const fk = f * k * Math.sqrt(1 + B * k * k);
     if (fk > 7000) break;
-    parts.push({ fk, a: Math.pow(k, -1.5) * Math.exp(-(k - 1) * bright * 0.55), tau: baseTau / (1 + 0.45 * (k - 1)), det: 1 + (k === 1 ? 0.0006 : 0.0011) });
+    parts.push({ fk, a: Math.pow(k, -1.8) * Math.exp(-(k - 1) * bright * 0.95), tau: baseTau / (1 + 0.45 * (k - 1)), det: 1 + (k === 1 ? 0.0006 : 0.0011) });
   }
   const r = rng(seed * 31 + midi);
   const lp = new OnePole();
-  const att = 0.012; // a felt hammer, not a click
+  const att = 0.035; // a soft felt hammer: no click, no 'ting'
   const relT = ring, relLen = 0.6;
   for (let i = 0; i < len; i++) {
     const t = i / SR;
@@ -40,8 +40,8 @@ function softPiano(midi, dur, vel = 0.6, seed = 1) {
     }
     const a = t < att ? 0.5 - 0.5 * Math.cos((Math.PI * t) / att) : 1;
     const rel = t < relT ? 1 : Math.max(0, 1 - (t - relT) / relLen);
-    const thump = t < 0.03 ? r() * 0.02 * (1 - t / 0.03) : 0;
-    out[i] = lp.lp((s * a * rel + thump) * vel * 0.35, 2600 + vel * 1200);
+    const thump = 0; void r;
+    out[i] = lp.lp((s * a * rel + thump) * vel * 0.35, 1300 + vel * 600);
   }
   return out;
 }
@@ -124,11 +124,11 @@ const stems = {
   piano, lead, nature, birds, fx,
   verb: reverb(verb, { room: 0.88, damp: 0.45, predelay: 0.02 }),
 };
-const GAIN = { piano: 0.85, lead: 1.25, nature: 0.13, birds: 0.9, fx: 0.7, verb: 0.9 };
+const GAIN = { piano: 0.85 * 0.63, lead: 1.25 * 0.63, nature: 0.13 * 1.41, birds: 0.9, fx: 0.7 * 0.71, verb: 0.9 * 0.63 };
 const out = path.join(__dirname, 'out');
 const mix = MIX.mixdown(stems, GAIN, { stemDir: process.env.STEMS ? out : null });
 MIX.highpass(mix, 30);
 MIX.fadeOut(mix, DURATION - 2.2, DURATION);
-const M = MIX.master(mix, parseFloat(process.env.DRIVE || '0.6'), undefined, { lufs: parseFloat(process.env.LUFS || '-16') });
+const M = MIX.master(mix, parseFloat(process.env.DRIVE || '0.6'), undefined, { lufs: process.env.LUFS ? parseFloat(process.env.LUFS) : null });
 MIX.writeWav(path.join(out, 'music.wav'), mix);
 console.log(`wrote out/music.wav (${DURATION.toFixed(2)}s${M.lufs !== undefined ? `, ${M.lufs.toFixed(1)} LUFS at drive ${M.drive.toFixed(2)}` : ''})`);
