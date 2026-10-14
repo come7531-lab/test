@@ -26,7 +26,7 @@ Talk to the user in Korean, simply. They are a creator, not a developer.
 
 **Scene table** (show this to the user):
 
-| # | 자막 (한 문장) | 손글씨 키워드 | 그림 / 다이어그램 | 길이 |
+| # | 자막 (한 문장) | 손글씨 키워드 | 그림 / 다이어그램 | 카메라 | 길이 |
 
 - **Length without narration:** a subtitle up to about 22 characters gets 1 bar (3.3 s); a longer one gets 2 bars.
 - **Proven arc for short films:** problem (person + burden) → mechanism (A→B→C cycle diagram) → turn (the practice, shown) → insight (zoom inside, X over the wrong answer) → principle (a simple graph) → rest (calm landscape + title + "○○○의 지혜").
@@ -51,6 +51,7 @@ sh .claude/skills/mind-story/scripts/new-film.sh <kebab-case-topic>
 - **film.js:** only the block marked `PER-FILM PART`, i.e. the `bgs` backgrounds, one `sceneX(ctx, t)` per scene and the `SCENES` list (same keys and order as score.js).
   - Read times from `S.S[key]` and `ev`, never hard-coded seconds.
   - Reuse the toolkit: `crayonFill crayonLine shape blobPts rrPts curve arrow word loop sparkle cloud birdV person hairCap cam vgrad hillPts FULL pr sm`.
+  - **Camera:** every new scene uses `camMove(ctx, t, key, recipe, { focus, to })` with one of the six approved recipes (`push pullPan follow reveal dive pullBack`) and the mixing rules in the style guide. Show the recipe in the scene table's 카메라 column.
   - Do not touch the toolkit, palette, fonts, subtitles or the cross-fade runner.
 - **song.js:** do not touch the instruments. Change sound only through the `LEVEL_DB` knobs (section 5).
 

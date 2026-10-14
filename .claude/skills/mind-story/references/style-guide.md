@@ -27,7 +27,18 @@ Every new film must keep these. Only the story, drawings, words and timings chan
 - Post: `{ paper: 0.55, vignette: 0.22, grain: 0.04 }`.
 - **Hand lettering**: font Gaegu Bold (`FONT`), via `word()` — writes on left→right and pops with a small zoom (outBack 0.55→1) and a gentle breathing scale. Key words 72–150 px, colours from the palette, a cream halo behind.
 - **Diagram devices**: `arrow()` (curved, head appears at the end), `loop()` (circle-highlight), red crayon X, `sparkle()`, small `birdV()`, `cloud()` bubbles, simple graphs drawn with `crayonLine` + axes arrows.
-- **Camera**: every scene moves — slow push-in (1.0→1.1) or zoom-out (1.15–1.3→1.0) with a pan; `cam()` clamps so zoom ≥ 1 and the frame is always covered. One scene may dive into the next (zoom to ×3 into a detail, next scene starts zoomed in).
+- **Camera — every scene moves, using the six approved recipes** (`camMove(ctx, t, key, recipe, { focus, to })` in film.js; `cam()` clamps so zoom ≥ 1 and the frame is always covered):
+
+  | recipe | move | use for |
+  |---|---|---|
+  | `push` | slow push-in 1.0→1.1 on the focus | a person / a burden — feel the weight |
+  | `pullPan` | start close (1.22) on the first element, pan and zoom out to the whole | diagrams that build left→right |
+  | `follow` | 1.0→1.08 while the centre glides with the drawing | graphs, a line being drawn |
+  | `reveal` | start 1.16 on a detail, open to the whole picture | landscapes, endings, titles |
+  | `dive` | settle 1.12→1.0, then in the last 0.55 s dive ×3.2 into the focus | "inside" moments (heart, mind) |
+  | `pullBack` | start 1.3 (already inside), open to 1.0 | always the scene right after a `dive` |
+
+  **Mixing rules:** never the same recipe twice in a row · `dive` is always followed by `pullBack` · at most one `dive` per ~4 scenes · start a film with `push` or `pullPan`, end it with `reveal`. Write the chosen recipe in the scene table's 그림 column.
 - **The little person** (`person()`): round head with dark hair cap, rounded crayon body, stick legs, closed-eye calm face. Options: `bend` (lean), `arms: down|up|hold|lap`, `face: calm|smile|tired`, `sit`, `shirt` colour. Returns `handR` and `chest` positions.
 
 ### Layout rules (learned in review)

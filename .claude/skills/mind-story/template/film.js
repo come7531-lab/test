@@ -300,6 +300,30 @@
     ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-cx, -cy);
   }
 
+  // ---------- camera recipes (the approved film's six moves, by name) ----------
+  // camMove(ctx, t, sceneKey, recipe, { focus: [x, y], to: [x, y] })  — use one per scene in new films.
+  //   push     slow push-in 1.0→1.1 on `focus`                         (film 1: 원함의 무게)
+  //   pullPan  start close 1.22 on `focus`, pan + zoom out to the whole (film 1: 다이어그램)
+  //   follow   1.0→1.08 while the centre glides from `focus` to `to`    (film 1: 그래프 — follows the drawing tip)
+  //   reveal   start 1.16 on `focus`, open to the whole landscape       (film 1: 마지막 풍경)
+  //   dive     settle 1.12→1.0, then in the last 0.55 s dive ×3.2 into `focus` (film 1: 놓아버리기 → 가슴 속으로)
+  //   pullBack the scene AFTER a dive: start 1.3 (already inside), open to 1.0 (film 1: 이미 안에)
+  // Mixing rule: never the same recipe twice in a row; a dive is always followed by pullBack; at most one dive per ~4 scenes.
+  function camMove(ctx, t, key, recipe, { focus = [W / 2, H / 2], to = [W / 2, H / 2] } = {}) {
+    const [t0, t1] = S.S[key], len = t1 - t0, c = [W / 2, H / 2];
+    const k = (d) => sm(pr(t, t0, Math.min(d, len)));
+    if (recipe === 'push') return cam(ctx, lerp(1.0, 1.1, k(3.6)), focus[0], focus[1]);
+    if (recipe === 'pullPan') { const u = k(3.4); return cam(ctx, lerp(1.22, 1.0, u), lerp(focus[0], c[0], u), lerp(focus[1], c[1], u)); }
+    if (recipe === 'follow') { const u = k(3.5); return cam(ctx, lerp(1.0, 1.08, u), lerp(focus[0], to[0], u), lerp(focus[1], to[1], u)); }
+    if (recipe === 'reveal') { const u = k(3.6); return cam(ctx, lerp(1.16, 1.0, u), lerp(focus[0], c[0], u), lerp(focus[1], c[1], u)); }
+    if (recipe === 'pullBack') { const u = k(2.6); return cam(ctx, lerp(1.3, 1.0, u), lerp(focus[0], c[0], u), lerp(focus[1], c[1], u)); }
+    if (recipe === 'dive') {
+      const u = k(2.4), d = ease.inCubic(pr(t, t1 - 0.55, 0.75));
+      return cam(ctx, lerp(lerp(1.12, 1.0, u), 3.2, d), lerp(c[0], focus[0], d), lerp(c[1], focus[1], d));
+    }
+    return cam(ctx, 1, c[0], c[1]);
+  }
+
   // ---------- scenes ----------
   const WANTS = [{ w: '인정', c: C.coral, x: 300, y: 250 }, { w: '통제', c: C.purple, x: 720, y: 160 }, { w: '안전', c: C.teal, x: 1170, y: 250 }];
 
