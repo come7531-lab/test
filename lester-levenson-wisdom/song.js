@@ -125,7 +125,7 @@ const stems = {
   verb: reverb(verb, { room: 0.88, damp: 0.45, predelay: 0.02 }),
 };
 const GAIN = { piano: 0.85 * 0.63, lead: 1.25 * 0.63, nature: 0, // brook removed
-  birds: 0.9, fx: 0.7 * 0.71, verb: 0.9 * 0.63 };
+  birds: 0.9, fx: 0.7 * 0.71 * 0.35, verb: 0.9 * 0.63 };
 const out = path.join(__dirname, 'out');
 const mix = MIX.mixdown(stems, GAIN, { stemDir: process.env.STEMS ? out : null });
 MIX.highpass(mix, 30);
