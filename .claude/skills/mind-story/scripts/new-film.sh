@@ -9,6 +9,9 @@ TARGET="$1"
 [ -e "$TARGET" ] && { echo "$TARGET already exists"; exit 1; }
 cp -r "$SKILL_DIR/template" "$TARGET"
 mkdir -p "$TARGET/out"
+# keep the big working files (frames, stems, video.mp4) out of git; only the final film is kept
+# (written here because hidden files can be dropped when the skill is uploaded as a zip)
+printf 'out/*\n!out/*.mp4\nout/video.mp4\n' > "$TARGET/.gitignore"
 
 CHROME=""
 for c in "$CHROME_PATH" /opt/pw-browsers/chromium "$(command -v chromium 2>/dev/null)" "$(command -v google-chrome 2>/dev/null)" "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"; do
