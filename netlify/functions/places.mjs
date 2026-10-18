@@ -1,7 +1,10 @@
-// GET /api/places?lat=&lng=&radius=&q=&theme=
-// Lists every restaurant (FD6) and cafe (CE7) inside the radius, not only famous ones.
+// GET /api/places
+//   ?lat&lng&radius            every restaurant (FD6) and cafe (CE7) in the circle
+//   ?q=성수동                   a 동네 in 서울·경기 -> same as above around it
+//   ?q=평양냉면[&scope=region]  a food keyword -> near lat/lng, or across all of 서울·경기
+//   ?theme=view[&scope=region] theme picks near lat/lng, or across all of 서울·경기
 // Kakao returns at most 45 results per query, so busy areas are split into smaller
-// rectangles until each piece fits.
+// rectangles, and region-wide searches run once per 구/시.
 import { json, fail, kakaoGet, normalizePlace, haversine, num, checkPasscode } from './_lib.mjs';
 
 const THEMES = {
@@ -10,17 +13,27 @@ const THEMES = {
   pretty: { group: 'CE7', queries: ['감성 카페', '예쁜 카페', '인테리어 카페', '대형 카페', '정원 카페', '베이커리 카페'] },
 };
 
-async function geocode(q) {
-  const a = await kakaoGet('/v2/local/search/address.json', { query: q, size: 1 });
-  if (a.documents?.length) {
-    const d = a.documents[0];
-    return { lat: Number(d.y), lng: Number(d.x), label: q };
+export const REGIONS = [
+  ...['종로구', '중구', '용산구', '성동구', '광진구', '동대문구', '중랑구', '성북구', '강북구', '도봉구', '노원구', '은평구', '서대문구', '마포구', '양천구', '강서구', '구로구', '금천구', '영등포구', '동작구', '관악구', '서초구', '강남구', '송파구', '강동구'].map((g) => `서울 ${g}`),
+  ...['수원시', '성남시', '의정부시', '안양시', '부천시', '광명시', '평택시', '동두천시', '안산시', '고양시', '과천시', '구리시', '남양주시', '오산시', '시흥시', '군포시', '의왕시', '하남시', '용인시', '파주시', '이천시', '안성시', '김포시', '화성시', '광주시', '양주시', '포천시', '여주시', '연천군', '가평군', '양평군'].map((g) => `경기 ${g}`),
+];
+const IN_AREA = /^(서울|경기)/;
+const FOOD = new Set(['FD6', 'CE7']);
+const SEOUL_HALL = { lat: 37.5663, lng: 126.9779 };
+
+// Turn a search box entry into either a place in 서울·경기 or a food keyword.
+async function resolve(q) {
+  const a = await kakaoGet('/v2/local/search/address.json', { query: q, size: 10 });
+  const addr = a.documents?.find((d) => IN_AREA.test(d.address_name));
+  if (addr) return { kind: 'area', center: { lat: Number(addr.y), lng: Number(addr.x), label: q } };
+  const k = await kakaoGet('/v2/local/search/keyword.json', { query: q, size: 15 });
+  const docs = (k.documents || []).filter((d) => IN_AREA.test(d.address_name));
+  const food = docs.filter((d) => FOOD.has(d.category_group_code)).length;
+  if (docs.length && food < docs.length / 2) {
+    const d = docs.find((x) => !FOOD.has(x.category_group_code)) || docs[0];
+    return { kind: 'area', center: { lat: Number(d.y), lng: Number(d.x), label: d.place_name } };
   }
-  const k = await kakaoGet('/v2/local/search/keyword.json', { query: q, size: 1 });
-  if (k.documents?.length) {
-    const d = k.documents[0];
-    return { lat: Number(d.y), lng: Number(d.x), label: d.place_name };
-  }
+  if (food) return { kind: 'keyword' };
   return null;
 }
 
@@ -36,7 +49,7 @@ async function collectRect(group, rect, budget, out, depth = 0) {
   const params = { category_group_code: group, rect: rect.join(','), size: 15 };
   const first = await kakaoGet('/v2/local/search/category.json', { ...params, page: 1 });
   const total = first.meta?.total_count ?? 0;
-  if (total > 45 && depth < 4) {
+  if (total > 45 && depth < 6) {
     const [x1, y1, x2, y2] = rect;
     const mx = (x1 + x2) / 2;
     const my = (y1 + y2) / 2;
@@ -56,14 +69,14 @@ async function collectRect(group, rect, budget, out, depth = 0) {
   }
 }
 
-async function themeSearch(theme, center, radius) {
-  const t = THEMES[theme];
+// Keyword search near a point (up to 45 per query).
+async function keywordNear(queries, group, center, radius, pages = 2) {
   const found = new Map();
-  await Promise.all(t.queries.map(async (query) => {
-    for (let page = 1; page <= 2; page++) {
+  await Promise.all(queries.map(async (query) => {
+    for (let page = 1; page <= pages; page++) {
       const r = await kakaoGet('/v2/local/search/keyword.json', {
-        query, x: center.lng, y: center.lat, radius: Math.max(radius, 1500),
-        category_group_code: t.group, size: 15, page, sort: 'accuracy',
+        query, x: center.lng, y: center.lat, radius: Math.min(20000, Math.max(radius, 1500)),
+        category_group_code: group, size: 15, page, sort: 'accuracy',
       });
       r.documents.forEach((d) => found.set(d.id, d));
       if (r.meta.is_end) break;
@@ -72,37 +85,69 @@ async function themeSearch(theme, center, radius) {
   return found;
 }
 
+// Keyword search across every 구 of 서울 and every 시·군 of 경기.
+async function keywordRegion(queries, group) {
+  const found = new Map();
+  const jobs = REGIONS.flatMap((region) => queries.map((q) => `${region} ${q}`));
+  await Promise.all(jobs.map(async (query) => {
+    const r = await kakaoGet('/v2/local/search/keyword.json', { query, category_group_code: group, size: 15, page: 1, sort: 'accuracy' })
+      .catch(() => ({ documents: [] }));
+    r.documents.forEach((d) => { if (IN_AREA.test(d.address_name)) found.set(d.id, d); });
+  }));
+  return found;
+}
+
+const toPlaces = (map, center, theme) => [...map.values()]
+  .filter((d) => FOOD.has(d.category_group_code))
+  .map((d) => { const p = normalizePlace(d, center); if (theme) p.themes.push(theme); return p; })
+  .sort((a, b) => a.distance - b.distance);
+
 export default async (req) => {
   const denied = checkPasscode(req);
   if (denied) return denied;
   const u = new URL(req.url);
-  const radius = num(u.searchParams.get('radius'), 500, 100, 1500);
+  const radius = num(u.searchParams.get('radius'), 500, 100, 5000);
   const theme = u.searchParams.get('theme');
-  try {
-    let center;
-    const q = u.searchParams.get('q');
-    if (q) {
-      center = await geocode(q);
-      if (!center) return fail('동네를 찾지 못했어요', 404);
-    } else {
-      const lat = Number(u.searchParams.get('lat'));
-      const lng = Number(u.searchParams.get('lng'));
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return fail('lat/lng 또는 q가 필요해요');
-      center = { lat, lng, label: u.searchParams.get('label') || '현재 위치' };
-    }
+  const region = u.searchParams.get('scope') === 'region';
+  const q = (u.searchParams.get('q') || '').trim().slice(0, 40);
+  const lat = Number(u.searchParams.get('lat'));
+  const lng = Number(u.searchParams.get('lng'));
+  const here = Number.isFinite(lat) && Number.isFinite(lng) && u.searchParams.get('lat') !== null
+    ? { lat, lng, label: u.searchParams.get('label') || '현재 위치' } : null;
 
+  try {
     if (theme) {
       if (!THEMES[theme]) return fail('unknown theme');
-      const found = await themeSearch(theme, center, radius);
-      const places = [...found.values()].map((d) => {
-        const p = normalizePlace(d, center);
-        p.themes.push(theme);
-        return p;
-      }).sort((a, b) => a.distance - b.distance);
-      return json({ center, theme, places }, 200, 600);
+      const t = THEMES[theme];
+      if (region) {
+        const found = await keywordRegion(t.queries.slice(0, 2), t.group);
+        return json({ mode: 'region-theme', theme, center: here || SEOUL_HALL, places: toPlaces(found, here || SEOUL_HALL, theme) }, 200, 3600);
+      }
+      if (!here) return fail('lat/lng required');
+      const found = await keywordNear(t.queries, t.group, here, radius);
+      return json({ mode: 'theme', theme, center: here, places: toPlaces(found, here, theme) }, 200, 600);
     }
 
-    const budget = { left: 90, truncated: false };
+    let center = here;
+    if (q) {
+      const r = await resolve(q);
+      if (!r) return fail('서울·경기에서 찾지 못했어요', 404);
+      if (r.kind === 'keyword') {
+        const base = here || SEOUL_HALL;
+        const [near, wide] = await Promise.all([
+          region ? keywordRegion([q], 'FD6').then(async (m) => { (await keywordRegion([q], 'CE7')).forEach((v, k) => m.set(k, v)); return m; })
+            : keywordNear([q], 'FD6', base, Math.max(radius, 3000), 3),
+          region ? Promise.resolve(new Map()) : keywordNear([q], 'CE7', base, Math.max(radius, 3000), 1),
+        ]);
+        wide.forEach((v, k) => near.set(k, v));
+        const places = toPlaces(near, base).filter((p) => IN_AREA.test(p.address));
+        return json({ mode: region ? 'region-keyword' : 'keyword', keyword: q, center: base, places }, 200, 600);
+      }
+      center = r.center;
+    }
+    if (!center) return fail('lat/lng 또는 q가 필요해요');
+
+    const budget = { left: radius > 1500 ? 220 : 120, truncated: false };
     const raw = new Map();
     const rect = rectAround(center, radius);
     await Promise.all(['FD6', 'CE7'].map((g) => collectRect(g, rect, budget, raw)));
@@ -110,7 +155,7 @@ export default async (req) => {
       .map((d) => normalizePlace(d, center))
       .filter((p) => haversine(center, p) <= radius * 1.05)
       .sort((a, b) => a.distance - b.distance);
-    return json({ center, radius, truncated: budget.truncated, places }, 200, 600);
+    return json({ mode: 'area', center, radius, truncated: budget.truncated, places }, 200, 600);
   } catch (e) {
     return fail(String(e.message || e), 502);
   }

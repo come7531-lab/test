@@ -19,7 +19,11 @@ const Analysis = z.object({
   summary: z.string().describe('2~3문장 요약'),
   pros: z.array(z.string()),
   cons: z.array(z.string()),
-  menus: z.array(z.string()).describe('리뷰에서 자주 언급된 대표 메뉴'),
+  menus: z.array(z.object({
+    name: z.string().describe('메뉴 이름'),
+    price: z.string().describe('리뷰에 나온 가격, 예: 15,000원. 없으면 빈 문자열'),
+    note: z.string().describe('왜 대표 메뉴인지 15자 안팎, 예: 리뷰 절반이 극찬'),
+  })).describe('리뷰에서 가장 많이 언급·추천된 순서로 최대 5개'),
   parking: z.object({ status: pick(PARKING), detail: z.string() }),
   break_time: z.object({ status: pick(BREAK), detail: z.string().describe('예: 평일 15:00~17:00') }),
   hours: z.string().describe('리뷰에 영업시간이 있으면 적고, 없으면 빈 문자열'),
@@ -49,6 +53,7 @@ const SYSTEM = `너는 맛집에 아주 진심인 한국 음식 평론가이자 
 - 브레이크타임: '브레이크타임', '쉬는시간', '15시~17시' 같은 표현을 찾아 시간까지 적는다.
 - tags는 리뷰 근거가 있을 때만 붙인다. '부모님과'는 정갈함, 조용함, 좌석 편안함, 부모님·가족 모임 언급이 있을 때.
   '뷰맛집'은 전망·오션뷰·리버뷰·루프탑 언급, '감성인테리어'는 인테리어·사진 맛집 언급이 있을 때.
+- 대표 메뉴는 언급·칭찬이 많은 순서로, 가격이 나오면 꼭 적는다.
 - 모든 문장은 짧고 담백한 한국어로 쓴다.`;
 
 let client;
@@ -97,6 +102,7 @@ ${lines.join('\n')}
     a.confidence = oneOf(a.confidence, CONF, '보통');
     a.parking.status = oneOf(a.parking.status, PARKING, '정보없음');
     a.break_time.status = oneOf(a.break_time.status, BREAK, '정보없음');
+    a.menus = (a.menus || []).filter((m) => m?.name).slice(0, 5);
     a.tags = [...new Set((a.tags || []).filter((t) => TAGS.includes(t)))];
     a.review_count = reviews.length;
     a.analyzed_at = new Date().toISOString();

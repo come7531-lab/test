@@ -39,7 +39,7 @@ function limiter(max) {
   };
   return (fn) => new Promise((resolve, reject) => { queue.push({ fn, resolve, reject }); next(); });
 }
-const kakaoLimit = limiter(8);
+const kakaoLimit = limiter(12);
 const naverLimit = limiter(6);
 
 // ---------- Kakao Local API ----------
