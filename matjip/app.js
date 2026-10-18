@@ -216,12 +216,12 @@
     $('#q').placeholder = S.scope === 'region' ? '서울·경기 전체에서 · 평양냉면, 오마카세…' : '동네나 메뉴 · 성수동, 연남동, 평양냉면…';
     const list = visible();
     const analyzed = list.filter((p) => S.analyses[p.id]).length;
-    $('#count').innerHTML = `<b>${list.length}</b>곳${analyzed ? ` · AI 평가 ${analyzed}` : ''}`;
+    $('#count').innerHTML = `<b>${list.length}</b>곳${analyzed ? ` · 평가 ${analyzed}` : ''}`;
     const empty = $('#empty');
     if (!list.length) {
       empty.hidden = false;
       empty.textContent = S.theme === 'parking'
-        ? '아직 주차를 확인한 곳이 없어요. 아래 “보이는 곳 AI 평가”를 눌러 리뷰에서 주차 정보를 찾아보세요.'
+        ? '아직 주차를 확인한 곳이 없어요. 아래 “보이는 곳 리뷰 평가”를 눌러 리뷰에서 주차 정보를 찾아보세요.'
         : dataset().length ? '조건에 맞는 곳이 없어요. 반경을 넓혀 보세요.' : '';
     } else empty.hidden = true;
 
@@ -234,7 +234,7 @@
       $('#more').hidden = list.length <= S.shown;
       observeImages();
     }
-    $('#ai-batch').hidden = S.demo || !(S.status.claude && S.status.naver) || !list.some((p) => !S.analyses[p.id]);
+    $('#ai-batch').hidden = S.demo || !S.status.naver || !list.some((p) => !S.analyses[p.id]);
   }
 
   function updateCard(id) {
@@ -454,19 +454,19 @@
     btn.disabled = true;
     let done = 0; let failed = 0;
     const label = $('span', btn);
-    label.textContent = `AI가 리뷰 읽는 중 0/${todo.length}`;
+    label.textContent = `리뷰 읽는 중 0/${todo.length}`;
     const queue = [...todo];
     const worker = async () => {
       while (queue.length) {
         const p = queue.shift();
         try { await analyze(p, await fetchReviews(p)); updateCard(p.id); } catch { failed++; }
         done++;
-        label.textContent = `AI가 리뷰 읽는 중 ${done}/${todo.length}`;
+        label.textContent = `리뷰 읽는 중 ${done}/${todo.length}`;
       }
     };
     await Promise.all([worker(), worker(), worker()]);
     btn.disabled = false;
-    label.textContent = '보이는 곳 AI 평가';
+    label.textContent = '보이는 곳 리뷰 평가';
     toast(`${todo.length - failed}곳 평가 완료${failed ? ` · ${failed}곳은 리뷰가 부족했어요` : ''}`);
     render();
   }
@@ -629,7 +629,7 @@
   function aiHTML(a) {
     const list = (xs) => (xs || []).slice(0, 4).map((x) => `<li>${esc(x)}</li>`).join('') || '<li>-</li>';
     return `
-      <h3>AI 리뷰 평점 <small>리뷰 ${a.review_count || 0}개 분석${a.ad_suspect_count ? ` · 광고의심 ${a.ad_suspect_count}` : ''}</small></h3>
+      <h3>${a.engine === 'free' ? '리뷰 점수 <span class="engine">무료 키워드 분석</span>' : 'AI 리뷰 평점'} <small>리뷰 ${a.review_count || 0}개${a.ad_suspect_count ? ` · 광고의심 ${a.ad_suspect_count}` : ''}</small></h3>
       <div class="ai-top">
         <div class="ai-score">${a.score.toFixed(1)}<small>/5</small></div>
         <div><div class="stars">${stars(a.score)}</div><div class="ai-sub">신뢰도 ${esc(a.confidence)}</div></div>
@@ -701,12 +701,7 @@
 
     if (S.analyses[p.id] && !force) return;
     if (S.demo) return;
-    if (!S.status.claude) {
-      $('#d-ai').innerHTML = '<h3>AI 리뷰 평점</h3><p class="note">Claude API 키를 넣으면 AI가 리뷰를 읽고 점수·대표 메뉴·주차·브레이크타임을 정리해 줘요.</p>';
-      $('#d-menus').innerHTML = '<h3>대표 메뉴</h3><p class="note">Claude API 키를 넣으면 리뷰에서 대표 메뉴와 가격을 찾아 줘요.</p>';
-      return;
-    }
-    $('#d-ai').innerHTML = `<div class="loading"><span class="dot"></span>AI가 리뷰 ${(reviews.blog?.length || 0) + (reviews.cafe?.length || 0)}개를 읽는 중…</div>`;
+    $('#d-ai').innerHTML = `<div class="loading"><span class="dot"></span>${S.status.claude ? 'AI가' : ''} 리뷰 ${(reviews.blog?.length || 0) + (reviews.cafe?.length || 0)}개를 읽는 중…</div>`;
     try {
       const a = await analyze(p, reviews);
       if (S.open !== p) return;

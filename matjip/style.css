@@ -267,3 +267,4 @@ main { padding: 0 12px; }
 .v-src { color: #fff; font-weight: 700; font-size: 13px; text-decoration: none; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.15); }
 .v-close { color: #fff; font-size: 20px; width: 36px; height: 36px; }
 .v-hint { position: absolute; bottom: calc(16px + env(safe-area-inset-bottom)); color: rgba(255,255,255,.6); font-size: 12px; margin: 0; }
+.engine { font-size: 11px; font-weight: 700; color: var(--ink-3); background: var(--chip); padding: 2px 7px; border-radius: 999px; }

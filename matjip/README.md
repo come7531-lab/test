@@ -29,16 +29,20 @@ Netlify → Site configuration → Environment variables 에 넣습니다.
 |---|---|---|
 | `KAKAO_REST_KEY` | [Kakao Developers](https://developers.kakao.com) → 앱 만들기 → 앱 키 → **REST API 키**. 앱 설정에서 **카카오맵** 사용을 켜야 합니다. | 가게 목록, 동네 검색, 주차장 |
 | `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET` | [NAVER Developers](https://developers.naver.com/apps) → 애플리케이션 등록 → 사용 API **검색** | 블로그·카페 리뷰, 카드 사진 |
-| `ANTHROPIC_API_KEY` | [Claude Console](https://console.anthropic.com) | AI 리뷰 분석 |
+| `ANTHROPIC_API_KEY` (선택, 유료) | [Claude Console](https://console.anthropic.com) | 넣으면 Claude가 리뷰를 읽어요. **안 넣으면 무료 키워드 분석**으로 동작해요. |
 | `APP_PASSCODE` (선택) | 아무 비밀번호 | 넣으면 처음 한 번 비밀번호를 물어봐요. 남이 내 API 비용을 쓰지 못하게 막습니다. |
 | `CLAUDE_MODEL` (선택) | 기본 `claude-opus-5-5` | `claude-haiku-5-5`로 바꾸면 훨씬 싸고 빠릅니다. |
 
 키를 넣은 뒤 **다시 배포**(Deploys → Trigger deploy)해야 적용됩니다.
 
-## 비용 감각
+## 완전 무료로 쓰기 (개인용)
 
-- 카카오·네이버 검색 API: 무료 (일일 한도 안에서).
-- Claude 분석: 가게 1곳당 한 번. 결과는 폰에 저장돼서 다시 열어도 비용이 들지 않아요. `claude-haiku-5-5`가 가장 저렴합니다.
+카카오·네이버 키만 넣으면 **0원**으로 전부 돌아갑니다.
+
+- Netlify 무료 플랜, 카카오 로컬 API, 네이버 검색 API 모두 무료예요 (개인이 쓰는 양이면 일일 한도에 닿지 않아요).
+- 리뷰 점수는 **무료 키워드 분석**이 매겨요. 칭찬·불만 표현을 세고, 협찬 글은 덜 반영하고, 가격이 붙은 메뉴와 주차·브레이크타임 문장을 찾아요.
+- 무료 분석은 Claude보다 거칠어요 (반어법이나 문맥은 못 읽어요). 나중에 더 정확하게 보고 싶으면 `ANTHROPIC_API_KEY`만 추가하면 바로 Claude로 바뀝니다. Claude Pro 구독과 API는 별도 결제예요.
+- `APP_PASSCODE`를 걸어 두면 링크가 새도 남이 내 무료 한도를 쓰지 못해요.
 
 ## 한계
 
