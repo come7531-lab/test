@@ -268,3 +268,17 @@ main { padding: 0 12px; }
 .v-close { color: #fff; font-size: 20px; width: 36px; height: 36px; }
 .v-hint { position: absolute; bottom: calc(16px + env(safe-area-inset-bottom)); color: rgba(255,255,255,.6); font-size: 12px; margin: 0; }
 .engine { font-size: 11px; font-weight: 700; color: var(--ink-3); background: var(--chip); padding: 2px 7px; border-radius: 999px; }
+
+/* ---------- 부모님 점수 ---------- */
+.card .par1 { font-size: 12px; color: var(--good); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .par1 b { font-weight: 800; }
+.parents-box h3 { font-size: 17px; }
+.par-top { display: flex; align-items: baseline; gap: 12px; }
+.par-score { font-size: 38px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+.par-score small { font-size: 14px; color: var(--ink-3); font-weight: 600; }
+.par-score.good { color: var(--good); } .par-score.mid { color: var(--warn); } .par-score.bad { color: var(--bad); }
+.par-verdict { font-weight: 700; font-size: 15px; }
+.par-reasons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.pr { font-size: 13px; font-weight: 700; padding: 5px 10px; border-radius: 999px; }
+.pr.ok { color: var(--good); background: color-mix(in srgb, var(--good) 13%, transparent); }
+.pr.no { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, transparent); }

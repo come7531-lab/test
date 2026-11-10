@@ -8,7 +8,7 @@
 import { json, fail, kakaoGet, normalizePlace, haversine, num, checkPasscode } from './_lib.mjs';
 
 const THEMES = {
-  parents: { group: 'FD6', queries: ['한정식', '부모님 모시고', '보양식', '코스요리', '한우', '장어'] },
+  parents: { group: 'FD6', queries: ['한정식', '부모님 모시고', '상견례', '룸 식당', '보양식', '코스요리', '한우', '장어', '생선구이'] },
   view: { group: 'CE7', queries: ['뷰 카페', '루프탑 카페', '오션뷰 카페', '리버뷰 카페', '전망 카페', '한강뷰 카페'] },
   pretty: { group: 'CE7', queries: ['감성 카페', '예쁜 카페', '인테리어 카페', '대형 카페', '정원 카페', '베이커리 카페'] },
 };

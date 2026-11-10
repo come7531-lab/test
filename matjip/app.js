@@ -163,16 +163,18 @@
     const tagged = !!a && a.tags.includes(tag);
     if (S.theme !== 'parents' && p.cat !== 'cafe' && !tagged) return false;
     if (S.theme === 'parents' && p.cat === 'cafe') return false;
+    if (S.theme === 'parents' && a?.parents) return a.parents.score >= 55;
     return tagged || S.hits[S.theme].has(p.id) || THEME_HINT[S.theme].test(`${p.name} ${p.category}`);
   }
 
   function visible() {
     const list = dataset().filter(matches);
     const d = (p) => p.distance ?? 1e9;
+    const key = (a) => (S.theme === 'parents' && a?.parents ? a.parents.score / 20 + a.score / 10 : a.score);
     if (S.sort === 'score') {
       list.sort((x, y) => {
         const a = S.analyses[x.id]; const b = S.analyses[y.id];
-        if (a && b) return b.score - a.score || d(x) - d(y);
+        if (a && b) return key(b) - key(a) || d(x) - d(y);
         if (a) return -1; if (b) return 1;
         return d(x) - d(y);
       });
@@ -201,6 +203,7 @@
       </div>
       <div class="info">
         <p class="name">${esc(p.name)}</p>
+        ${S.theme === 'parents' && a?.parents ? `<div class="par1"><b>부모님 ${a.parents.score}</b>${a.parents.reasons.filter((r) => r.good).slice(0, 2).map((r) => ` · ${esc(r.label)}`).join('')}</div>` : ''}
         ${top ? `<div class="menu1">🍴 ${esc(top.name)}${top.price ? ` <span>${esc(top.price)}</span>` : ''}</div>` : ''}
         <div class="meta">${esc(shortCat(p))}${wide && regionOf(p) ? ` · ${esc(regionOf(p))}` : ''} · ${dist(p.distance)}</div>
         ${a?.one_line ? `<div class="line">${esc(a.one_line)}</div>` : ''}
@@ -447,10 +450,24 @@
     return r.analysis;
   }
 
-  async function batchAnalyze() {
+  function setSort(v) {
+    S.sort = v;
+    $$('[data-sort]').forEach((x) => x.classList.toggle('on', x.dataset.sort === v));
+  }
+
+  let batchRunning = false;
+  async function batchAnalyze(n = 10) {
+    if (batchRunning) return;
     const btn = $('#ai-batch');
-    const todo = visible().filter((p) => !S.analyses[p.id]).slice(0, 10);
+    // parents theme: also check keyword-matched places so the score can confirm or drop them
+    const pool = S.theme === 'parents'
+      ? dataset().filter((p) => p.cat !== 'cafe' && (S.hits.parents.has(p.id) || THEME_HINT.parents.test(`${p.name} ${p.category}`) || p.cat === 'korean'))
+      : visible();
+    const todo = pool.filter((p) => !S.analyses[p.id] || (S.theme === 'parents' && !S.analyses[p.id].parents))
+      .sort((x, y) => (x.distance ?? 1e9) - (y.distance ?? 1e9)).slice(0, n);
     if (!todo.length) return;
+    batchRunning = true;
+    btn.hidden = false;
     btn.disabled = true;
     let done = 0; let failed = 0;
     const label = $('span', btn);
@@ -466,6 +483,7 @@
     };
     await Promise.all([worker(), worker(), worker()]);
     btn.disabled = false;
+    batchRunning = false;
     label.textContent = '보이는 곳 리뷰 평가';
     toast(`${todo.length - failed}곳 평가 완료${failed ? ` · ${failed}곳은 리뷰가 부족했어요` : ''}`);
     render();
@@ -518,6 +536,7 @@
       </div>
       <section id="d-menus" class="box menus-box">${menusHTML(p, a)}</section>
       <div id="d-facts" class="facts">${factsHTML(a)}</div>
+      <section id="d-parents" class="box parents-box">${parentsHTML(a)}</section>
       <div id="d-map" class="d-map"></div>
       <div class="d-actions">
         <a href="https://map.naver.com/p/search/${nameQ}" target="_blank" rel="noopener"><span>🟢</span>네이버 평점</a>
@@ -614,6 +633,17 @@
     if (S.open === p) $('#d-menus').innerHTML = menusHTML(p, S.analyses[p.id]);
   }
 
+  // ----- 부모님과 가기 -----
+  function parentsHTML(a) {
+    if (!a) return '<h3>부모님과 가기</h3><div class="loading"><span class="dot"></span>리뷰에서 좌석·소음·주차를 확인하는 중…</div>';
+    if (!a.parents) return '<h3>부모님과 가기</h3><p class="note">다시 분석하면 부모님 점수가 나와요.</p>';
+    const { score, reasons } = a.parents;
+    const verdict = score >= 75 ? '모시고 가기 좋아요' : score >= 55 ? '무난해요' : '다른 곳을 추천해요';
+    return `<h3>부모님과 가기 <small>좌석·소음·음식·주차·계단</small></h3>
+      <div class="par-top"><div class="par-score ${score >= 75 ? 'good' : score >= 55 ? 'mid' : 'bad'}">${score}<small>/100</small></div><div class="par-verdict">${verdict}</div></div>
+      ${reasons.length ? `<div class="par-reasons">${reasons.map((r) => `<span class="pr ${r.good ? 'ok' : 'no'}">${r.good ? '✓' : '!'} ${esc(r.label)}</span>`).join('')}</div>` : '<p class="note">리뷰에 좌석·소음 같은 언급이 적어요. 전화로 입식 테이블인지 확인해 보세요.</p>'}`;
+  }
+
   // ----- facts, AI box -----
   function factsHTML(a) {
     const pk = a?.parking; const br = a?.break_time;
@@ -707,6 +737,7 @@
       if (S.open !== p) return;
       $('#d-ai').innerHTML = aiHTML(a);
       $('#d-facts').innerHTML = factsHTML(a);
+      $('#d-parents').innerHTML = parentsHTML(a);
       $('#d-menus').innerHTML = menusHTML(p, a);
       loadMenuPics(p, a);
       updateCard(p.id);
@@ -786,7 +817,9 @@
         skeleton(S.scope === 'region' ? '서울·경기 전체에서 찾는 중…' : '');
         try { await loadTheme(S.theme); } catch (e) { toast(e.message); }
       }
+      if (S.theme === 'parents') setSort('score');
       render();
+      if (S.theme === 'parents' && !S.demo && S.status.naver && S.status.analyzer === 'free') batchAnalyze(12);
     }));
     $('#locate').addEventListener('click', () => (S.demo ? toast('샘플 모드예요. API 키를 넣으면 현재 위치로 찾아요.') : locate(false)));
     $('#where').addEventListener('click', (e) => {
@@ -810,13 +843,11 @@
         skeleton(S.scope === 'region' ? `서울·경기 전체에서 ${THEME_NAME[t]} 찾는 중…` : '');
         try { await loadTheme(S.theme); } catch (e) { toast(e.message); }
       }
+      if (S.theme === 'parents') setSort('score');
       render();
+      if (S.theme === 'parents' && !S.demo && S.status.naver && S.status.analyzer === 'free') batchAnalyze(12);
     }));
-    $$('[data-sort]').forEach((b) => b.addEventListener('click', () => {
-      S.sort = b.dataset.sort;
-      $$('[data-sort]').forEach((x) => x.classList.toggle('on', x === b));
-      render();
-    }));
+    $$('[data-sort]').forEach((b) => b.addEventListener('click', () => { setSort(b.dataset.sort); render(); }));
     $$('[data-view]').forEach((b) => b.addEventListener('click', () => {
       S.view = b.dataset.view;
       $$('[data-view]').forEach((x) => x.classList.toggle('on', x === b));
@@ -824,7 +855,7 @@
     }));
     $('#more').addEventListener('click', () => { S.shown += PAGE; render(); });
     $('#grid').addEventListener('click', (e) => { const c = e.target.closest('.card[data-id]'); if (c) openPlace(c.dataset.id); });
-    $('#ai-batch').addEventListener('click', batchAnalyze);
+    $('#ai-batch').addEventListener('click', () => batchAnalyze(10));
     $('#sheet-close').addEventListener('click', () => closeSheet());
     $('#sheet-backdrop').addEventListener('click', () => closeSheet());
     $('#sheet-body').addEventListener('click', (e) => {

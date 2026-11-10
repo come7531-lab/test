@@ -129,6 +129,47 @@ function findHours(texts) {
   return '';
 }
 
+
+// ---------- 부모님 점수 (0~100) ----------
+// Each rule: [label shown to the user, good?, pattern, points]. A rule counts once per place.
+const PARENT_RULES = [
+  ['입식·테이블석', true, /입식|테이블석|테이블 자리|의자석|좌식\s?아니/, 10],
+  ['좌식이라 불편', false, /좌식(?!\s?(아니|아님|아닌))|양반다리|바닥에 앉|신발 벗/, -14],
+  ['룸·별실 있음', true, /룸이|룸 있|룸으로|별실|프라이빗|개별\s?룸|방이 따로/, 10],
+  ['조용해요', true, /조용|대화하기 좋|차분/, 9],
+  ['시끄러워요', false, /시끄|북적|정신없|소란/, -10],
+  ['웨이팅이 길어요', false, /웨이팅이 길|웨이팅 \d+\s?시간|한참 기다|오픈런/, -7],
+  ['정갈한 음식', true, /정갈|깔끔한 반찬|정성|단정/, 8],
+  ['간이 세지 않아요', true, /간이 세지|슴슴|담백|자극적이지 않|싱겁지도|부드럽/, 8],
+  ['자극적인 맛', false, /너무 맵|매워서|자극적|너무 짜|짜다/, -7],
+  ['주차 편해요', true, /주차\s?(?:는|가|도)?\s?(가능|편|무료|넉넉|여유)|전용\s?주차|발렛/, 12],
+  ['주차 어려워요', false, /주차\s?(?:는|가|도|를)?\s?(불가|안\s?돼|안\s?되|공간(이)?\s?없|어렵|힘들)/, -10],
+  ['엘리베이터 있음', true, /엘리베이터|엘레베이터|1층이라|계단 없/, 6],
+  ['계단이 많아요', false, /계단이 (많|가파)|계단을 올라|지하로 내려가/, -8],
+  ['가족 모임 많이 해요', true, /부모님|어르신|가족\s?모임|생신|효도|상견례|칠순|팔순|환갑|어머니|아버지/, 12],
+  ['친절해요', true, /친절/, 6],
+  ['화장실 깨끗', true, /화장실(이)?\s?(깨끗|깔끔)|화장실 내부/, 4],
+];
+const PARENT_FOOD = /한정식|한식|생선|보양|한우|장어|오리|백숙|삼계탕|두부|샤브|전복|곰탕|갈비탕|정식|코스|일식집|죽/;
+const PARENT_BAD_FOOD = /술집|호프|포장마차|분식|치킨|패스트푸드|햄버거|떡볶이|마라|클럽|바\b/;
+
+export function parentScore(place, texts) {
+  const all = texts.join('\n');
+  const reasons = [];
+  let score = 50;
+  for (const [label, good, re, pts] of PARENT_RULES) {
+    if (re.test(all)) { score += pts; reasons.push({ label, good }); }
+  }
+  const cat = `${place.category || ''} ${place.name || ''}`;
+  if (PARENT_FOOD.test(cat)) { score += 8; reasons.push({ label: '어르신 입맛 메뉴', good: true }); }
+  if (PARENT_BAD_FOOD.test(cat)) { score -= 15; reasons.push({ label: '젊은 분위기 가게', good: false }); }
+  // good reasons first, then the cautions
+  reasons.sort((a, b) => Number(b.good) - Number(a.good));
+  // tapers off near the ends, so only places with many good signs reach the 90s
+  const out = 50 + 50 * Math.tanh((score - 50) / 60);
+  return { score: Math.max(0, Math.min(100, Math.round(out))), reasons: reasons.slice(0, 8) };
+}
+
 export function freeAnalyze(place, reviews) {
   const items = reviews.map((r) => ({ ad: !!r.ad, text: `${r.title || ''} ${r.description || ''}` }));
   const texts = items.map((i) => i.text);
@@ -172,6 +213,7 @@ export function freeAnalyze(place, reviews) {
     tags,
     ad_suspect_count: adCount,
     review_count: n,
+    parents: parentScore(place, texts),
     engine: 'free',
     analyzed_at: new Date().toISOString(),
   };

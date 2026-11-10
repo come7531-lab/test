@@ -30,6 +30,13 @@ const Analysis = z.object({
   hours: z.string().describe('리뷰에 영업시간이 있으면 적고, 없으면 빈 문자열'),
   tags: z.array(z.string()).describe(`해당하는 것만: ${TAGS.join(', ')}`),
   ad_suspect_count: z.number().int(),
+  parents: z.object({
+    score: z.number().describe('부모님(60~80대) 모시고 가기 좋은 정도 0~100. 근거 없으면 50 근처'),
+    reasons: z.array(z.object({
+      label: z.string().describe('10자 안팎, 예: 입식 테이블, 룸 있음, 조용함, 주차 편함, 계단 많음, 좌식이라 불편'),
+      good: z.boolean().describe('부모님께 좋은 점이면 true, 주의할 점이면 false'),
+    })).describe('리뷰 근거가 있는 것만, 최대 8개'),
+  }),
 });
 
 // Exact match first; otherwise the longest option contained in the text
@@ -55,6 +62,8 @@ const SYSTEM = `너는 맛집에 아주 진심인 한국 음식 평론가이자 
 - tags는 리뷰 근거가 있을 때만 붙인다. '부모님과'는 정갈함, 조용함, 좌석 편안함, 부모님·가족 모임 언급이 있을 때.
   '뷰맛집'은 전망·오션뷰·리버뷰·루프탑 언급, '감성인테리어'는 인테리어·사진 맛집 언급이 있을 때.
 - 대표 메뉴는 언급·칭찬이 많은 순서로, 가격이 나오면 꼭 적는다.
+- parents(부모님 점수)는 60~80대 부모님을 모시고 가기 좋은지를 본다: 입식·테이블석(좌식은 무릎이 불편해 감점), 룸·별실, 조용함, 정갈하고 간이 세지 않은 음식,
+  주차·엘리베이터(계단 많으면 감점), 가족 모임·생신 언급, 친절함. 시끄럽거나 웨이팅이 길거나 술집 분위기면 감점.
 - 모든 문장은 짧고 담백한 한국어로 쓴다.`;
 
 let client;
@@ -106,6 +115,10 @@ ${lines.join('\n')}
     a.parking.status = oneOf(a.parking.status, PARKING, '정보없음');
     a.break_time.status = oneOf(a.break_time.status, BREAK, '정보없음');
     a.menus = (a.menus || []).filter((m) => m?.name).slice(0, 5);
+    a.parents = {
+      score: Math.round(Math.min(100, Math.max(0, Number(a.parents?.score) || 50))),
+      reasons: (a.parents?.reasons || []).filter((r) => r?.label).slice(0, 8),
+    };
     a.tags = [...new Set((a.tags || []).filter((t) => TAGS.includes(t)))];
     a.review_count = reviews.length;
     a.analyzed_at = new Date().toISOString();
