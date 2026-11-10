@@ -16,7 +16,7 @@ function relevant(item, name) {
 }
 
 export default async (req) => {
-  const denied = checkPasscode(req);
+  const denied = await checkPasscode(req);
   if (denied) return denied;
   const u = new URL(req.url);
   const name = (u.searchParams.get('name') || '').slice(0, 60);

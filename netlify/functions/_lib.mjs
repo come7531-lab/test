@@ -1,8 +1,79 @@
 // Shared helpers for the 맛집 레이더 API functions.
 
-export function env(key) {
+import { createHash } from 'node:crypto';
+import { readFile, writeFile } from 'node:fs/promises';
+import { getStore } from '@netlify/blobs';
+
+// ---------- keys & settings ----------
+// Keys come from Netlify environment variables, or from the in-app setup screen,
+// which saves them in this site's private Blobs store (never sent back to the browser).
+const CONFIG = {};
+let loadedAt = 0;
+const LOCAL_FILE = process.env.MATJIP_CONFIG_FILE || '.matjip-config.json';
+
+function configStore() {
+  try { return getStore({ name: 'matjip-config', consistency: 'strong' }); } catch { return null; }
+}
+
+export async function readConfig() {
+  const store = configStore();
+  if (store) return (await store.get('config', { type: 'json' })) || {};
+  // local dev without Netlify: a git-ignored file
+  try { return JSON.parse(await readFile(LOCAL_FILE, 'utf8')); } catch { return {}; }
+}
+
+export async function writeConfig(obj) {
+  const store = configStore();
+  if (store) await store.setJSON('config', obj);
+  else await writeFile(LOCAL_FILE, JSON.stringify(obj));
+  Object.keys(CONFIG).forEach((k) => delete CONFIG[k]);
+  Object.assign(CONFIG, obj);
+  loadedAt = Date.now();
+}
+
+export async function loadConfig(force = false) {
+  if (!force && Date.now() - loadedAt < 30_000) return CONFIG;
+  const c = await readConfig().catch(() => ({}));
+  Object.keys(CONFIG).forEach((k) => delete CONFIG[k]);
+  Object.assign(CONFIG, c);
+  loadedAt = Date.now();
+  return CONFIG;
+}
+
+export const hashCode = (s) => createHash('sha256').update(`matjip:${s}`).digest('hex');
+
+export function envOnly(key) {
   const v = globalThis.Netlify?.env?.get?.(key) ?? process.env[key];
   return v && String(v).trim() ? String(v).trim() : undefined;
+}
+
+export function env(key) {
+  return envOnly(key) ?? (CONFIG[key] ? String(CONFIG[key]) : undefined);
+}
+
+// Your own Claude key only. Netlify's AI Gateway injects ANTHROPIC_API_KEY plus
+// ANTHROPIC_BASE_URL into every function and bills Netlify credits, so that key is
+// ignored unless MATJIP_USE_NETLIFY_AI=true.
+export function claudeKey() {
+  if (CONFIG.ANTHROPIC_API_KEY) return String(CONFIG.ANTHROPIC_API_KEY);
+  const k = envOnly('ANTHROPIC_API_KEY');
+  if (!k) return undefined;
+  if (envOnly('ANTHROPIC_BASE_URL') && envOnly('MATJIP_USE_NETLIFY_AI') !== 'true') return undefined;
+  return k;
+}
+
+// A key saved in the app goes straight to Anthropic; an env key uses the env base URL (if any).
+export function claudeBaseURL() {
+  if (CONFIG.ANTHROPIC_API_KEY) return 'https://api.anthropic.com';
+  return envOnly('ANTHROPIC_BASE_URL') || 'https://api.anthropic.com';
+}
+
+export function passcodeOk(req) {
+  const given = req.headers.get('x-app-key') || '';
+  const plain = envOnly('APP_PASSCODE');
+  const hash = CONFIG.APP_PASSCODE_HASH;
+  if (!plain && !hash) return true;
+  return (plain && given === plain) || (hash && hashCode(given) === hash);
 }
 
 export function json(data, status = 200, maxAge = 0) {
@@ -20,11 +91,10 @@ export function fail(message, status = 400) {
 }
 
 // Optional passcode so strangers can't spend your API quota.
-export function checkPasscode(req) {
-  const code = env('APP_PASSCODE');
-  if (!code) return null;
-  if (req.headers.get('x-app-key') === code) return null;
-  return fail('passcode required', 401);
+// Loads saved keys, then checks the app passcode (if one is set).
+export async function checkPasscode(req) {
+  await loadConfig();
+  return passcodeOk(req) ? null : fail('passcode required', 401);
 }
 
 // ---------- small concurrency limiter ----------

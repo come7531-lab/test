@@ -3,7 +3,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
 import { z } from 'zod';
-import { json, fail, env, checkPasscode } from './_lib.mjs';
+import { json, fail, env, checkPasscode, claudeKey, claudeBaseURL } from './_lib.mjs';
 import { freeAnalyze } from './_free.mjs';
 
 export const TAGS = ['부모님과', '데이트', '뷰맛집', '감성인테리어', '가성비', '웨이팅있음', '혼밥', '단체모임', '아이동반', '반려동물', '조용함', '노포'];
@@ -66,10 +66,9 @@ const SYSTEM = `너는 맛집에 아주 진심인 한국 음식 평론가이자 
   주차·엘리베이터(계단 많으면 감점), 가족 모임·생신 언급, 친절함. 시끄럽거나 웨이팅이 길거나 술집 분위기면 감점.
 - 모든 문장은 짧고 담백한 한국어로 쓴다.`;
 
-let client;
 
 export default async (req) => {
-  const denied = checkPasscode(req);
+  const denied = await checkPasscode(req);
   if (denied) return denied;
   if (req.method !== 'POST') return fail('POST only', 405);
 
@@ -81,7 +80,7 @@ export default async (req) => {
   if (!reviews.length) return fail('리뷰가 없어 분석할 수 없어요', 422);
 
   // No Claude key -> free keyword analysis (costs nothing).
-  if (!env('ANTHROPIC_API_KEY')) return json({ analysis: freeAnalyze(place, reviews) });
+  if (!claudeKey()) return json({ analysis: freeAnalyze(place, reviews) });
 
   const clip = (s, n) => String(s || '').slice(0, n);
   const lines = reviews.map((r, i) =>
@@ -97,7 +96,7 @@ ${lines.join('\n')}
 위 리뷰만 근거로 분석해줘.`;
 
   try {
-    client ??= new Anthropic({ apiKey: env('ANTHROPIC_API_KEY'), timeout: 25_000, maxRetries: 1 });
+    const client = new Anthropic({ apiKey: claudeKey(), baseURL: claudeBaseURL(), timeout: 25_000, maxRetries: 1 });
     const res = await client.beta.messages.parse({
       model: env('CLAUDE_MODEL') || 'claude-opus-5-5',
       max_tokens: 8000,

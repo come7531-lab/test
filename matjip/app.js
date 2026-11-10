@@ -510,6 +510,67 @@
     if (!fromPop && history.state?.sheet) history.back();
   }
 
+  // ---------- key setup (saved on the server, never shown again) ----------
+  function openSetup() {
+    if (S.status.setup === 'netlify-env') {
+      showSheet(`<div class="d-head"><h2 class="d-name">설정</h2><div class="d-addr">이 사이트는 Netlify 환경 변수로 키가 설정돼 있어요. 키를 바꾸려면 Netlify에서 바꿔 주세요.</div></div>`, 'setup');
+      return;
+    }
+    const first = S.status.setup !== 'saved';
+    const field = (id, label, ph, hint = '') => `<label class="f"><span>${label}</span>
+        <input id="${id}" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${ph}">${hint ? `<small>${hint}</small>` : ''}</label>`;
+    showSheet(`
+      <div class="d-head"><h2 class="d-name">${first ? '키 넣고 시작하기' : '키 설정'}</h2>
+        <div class="d-addr">${first ? '키는 이 앱의 서버 저장소에만 저장되고, 화면이나 코드에는 다시 나오지 않아요.' : '바꿀 칸만 채우세요. 비워 둔 칸은 그대로 유지돼요.'}</div></div>
+      <form id="setup-form" autocomplete="off">
+        ${first ? '' : `<section class="box">${field('s-cur', '현재 앱 비밀번호', '처음에 정한 비밀번호')}</section>`}
+        <section class="box">
+          <h3>① 카카오 <small>가게 목록·주차장</small></h3>
+          <ol class="steps"><li>아래 버튼으로 카카오 개발자 사이트에 로그인</li><li><b>내 애플리케이션 → 애플리케이션 추가하기</b> (이름은 아무거나)</li><li><b>앱 키</b>에서 <b>REST API 키</b> 복사</li><li>왼쪽 메뉴 <b>카카오맵</b>에서 <b>사용 설정 ON</b></li></ol>
+          <a class="btn ghost" href="https://developers.kakao.com/console/app" target="_blank" rel="noopener">카카오 개발자 사이트 열기 ↗</a>
+          ${field('s-kakao', 'REST API 키', '복사한 키 붙여넣기')}
+        </section>
+        <section class="box">
+          <h3>② 네이버 <small>블로그·카페 리뷰·사진</small></h3>
+          <ol class="steps"><li>아래 버튼으로 네이버 개발자 사이트에 로그인</li><li><b>애플리케이션 등록</b> → 사용 API <b>검색</b> 선택</li><li>환경 <b>WEB 설정</b>에 이 주소 입력: <code>${esc(location.origin)}</code></li><li>등록 후 나오는 <b>Client ID</b>와 <b>Client Secret</b> 복사</li></ol>
+          <a class="btn ghost" href="https://developers.naver.com/apps/#/register" target="_blank" rel="noopener">네이버 개발자 사이트 열기 ↗</a>
+          ${field('s-nid', 'Client ID', '붙여넣기')}
+          ${field('s-nsec', 'Client Secret', '붙여넣기')}
+        </section>
+        <section class="box">
+          <h3>③ 앱 비밀번호 <small>${first ? '필수' : '바꿀 때만'}</small></h3>
+          ${field('s-pass', first ? '앱 비밀번호 정하기' : '새 비밀번호', '4자 이상', '링크가 새도 남이 못 쓰게 막아요. 이 폰에는 기억돼요.')}
+        </section>
+        <details class="box"><summary>Claude 키 (선택, 유료)</summary>
+          ${field('s-claude', 'Anthropic API 키', '없으면 비워 두세요', '없으면 무료 키워드 분석을 써요.')}
+        </details>
+        <p id="setup-msg" class="note"></p>
+        <button class="btn wide" type="submit">저장하고 시작하기</button>
+      </form>`, 'setup');
+    $('#setup-form').addEventListener('submit', saveSetup);
+  }
+
+  async function saveSetup(e) {
+    e.preventDefault();
+    const v = (id) => ($(id)?.value || '').trim();
+    const msg = $('#setup-msg');
+    const btn = $('#setup-form button[type=submit]');
+    const body = { kakao: v('#s-kakao'), naverId: v('#s-nid'), naverSecret: v('#s-nsec'), claude: v('#s-claude'), passcode: v('#s-pass') };
+    const current = v('#s-cur') || store.get('mj.key') || '';
+    btn.disabled = true; msg.textContent = '키를 확인하는 중…';
+    try {
+      const res = await fetch('/api/setup', { method: 'POST', headers: { 'content-type': 'application/json', 'x-app-key': current }, body: JSON.stringify(body) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      store.set('mj.key', body.passcode || current);
+      msg.textContent = '저장했어요! 다시 불러오는 중…';
+      setTimeout(() => location.reload(), 600);
+    } catch (err) {
+      msg.textContent = err.message;
+      btn.disabled = false;
+    }
+  }
+
   function openRegions() {
     const chips = (prefix, list) => list.map((g) => `<button class="cat" data-region="${esc(`${prefix} ${g}`)}">${esc(g)}</button>`).join('');
     showSheet(`
@@ -821,6 +882,7 @@
       render();
       if (S.theme === 'parents' && !S.demo && S.status.naver && S.status.analyzer === 'free') batchAnalyze(12);
     }));
+    $$('[data-setup]').forEach((b) => b.addEventListener('click', openSetup));
     $('#locate').addEventListener('click', () => (S.demo ? toast('샘플 모드예요. API 키를 넣으면 현재 위치로 찾아요.') : locate(false)));
     $('#where').addEventListener('click', (e) => {
       if (e.target.closest('[data-clear-kw]')) { S.kw = null; S.shown = PAGE; $('#q').value = ''; render(); }
@@ -892,6 +954,7 @@
       $('#demo-banner').hidden = false;
       if (!window.DEMO) { $('#where').textContent = 'API 키가 필요해요'; return; }
       loadDemo();
+      if (S.status.setup === 'needed') openSetup();
       return;
     }
     locate(true);

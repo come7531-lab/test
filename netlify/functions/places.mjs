@@ -103,7 +103,7 @@ const toPlaces = (map, center, theme) => [...map.values()]
   .sort((a, b) => a.distance - b.distance);
 
 export default async (req) => {
-  const denied = checkPasscode(req);
+  const denied = await checkPasscode(req);
   if (denied) return denied;
   const u = new URL(req.url);
   const radius = num(u.searchParams.get('radius'), 500, 100, 5000);

@@ -5,7 +5,7 @@ import { json, fail, kakaoGet, normalizePlace, checkPasscode } from './_lib.mjs'
 const PUBLIC = /공영|공용|구립|시립|군립|공공|노상|환승/;
 
 export default async (req) => {
-  const denied = checkPasscode(req);
+  const denied = await checkPasscode(req);
   if (denied) return denied;
   const u = new URL(req.url);
   const lat = Number(u.searchParams.get('lat'));

@@ -5,7 +5,7 @@ import { json, fail, naverSearch, checkPasscode, num } from './_lib.mjs';
 const bigger = (u = '') => (/type=b\d+/.test(u) ? u.replace(/type=b\d+/, 'type=w773') : u);
 
 export default async (req) => {
-  const denied = checkPasscode(req);
+  const denied = await checkPasscode(req);
   if (denied) return denied;
   const u = new URL(req.url);
   const q = (u.searchParams.get('q') || '').slice(0, 80);
