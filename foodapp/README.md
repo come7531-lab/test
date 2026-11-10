@@ -53,16 +53,22 @@ Netlify → Site configuration → Environment variables 에 넣습니다.
 - 주차장 **요금**은 API로 받을 수 없어서, 보통 저렴한 공영주차장을 먼저 보여주고 상세 링크로 연결합니다.
 - 분석이 시간 초과로 실패하면 `CLAUDE_MODEL=claude-haiku-5-5`로 바꾸세요 (Netlify 함수 기본 제한 10초).
 
+## 주소
+
+- 앱: https://come7531-foodapp.netlify.app (Netlify 사이트 `come7531-foodapp`, 기본 폴더 `foodapp`)
+- 키는 앱 첫 화면의 "키 넣고 시작하기"에서 넣어요. 사이트의 비공개 저장소(Blobs `foodapp-config`)에 저장돼요.
+
 ## 로컬에서 실행
 
 ```sh
+cd foodapp
 npm install
-# .env 파일에 위 키들을 KEY=값 형식으로 적기
-npm run dev   # http://localhost:8888/foodapp/
+npm run dev   # http://localhost:8888/
 ```
 
-## 파일
+## 파일 (모두 `foodapp/` 안에 있어요)
 
-- `foodapp/` — 화면 (HTML/CSS/JS, 빌드 없음)
-- `netlify/functions/` — API 키를 숨겨 주는 서버 함수 (`places`, `reviews`, `analyze`, `parking`, `image`, `status`)
+- `index.html`, `app.js`, `style.css`, `demo.js` — 화면 (빌드 없음)
+- `netlify/functions/` — 키를 숨겨 주는 서버 함수 (`places`, `reviews`, `analyze`, `parking`, `image`, `setup`, `status`)
+- `netlify.toml` — 이 앱 전용 Netlify 설정
 - `dev-server.mjs` — 로컬 실행용 서버

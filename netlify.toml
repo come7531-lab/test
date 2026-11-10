@@ -1,6 +1,9 @@
 [build]
   publish = "."
 
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
+# The food app has its own site (come7531-foodapp); send visitors there.
+[[redirects]]
+  from = "/foodapp/*"
+  to = "https://come7531-foodapp.netlify.app/"
+  status = 302
+  force = true

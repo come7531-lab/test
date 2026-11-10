@@ -541,9 +541,6 @@
           <h3>③ 앱 비밀번호 <small>${first ? '필수' : '바꿀 때만'}</small></h3>
           ${field('s-pass', first ? '앱 비밀번호 정하기' : '새 비밀번호', '4자 이상', '링크가 새도 남이 못 쓰게 막아요. 이 폰에는 기억돼요.')}
         </section>
-        <details class="box"><summary>Claude 키 (선택, 유료)</summary>
-          ${field('s-claude', 'Anthropic API 키', '없으면 비워 두세요', '없으면 무료 키워드 분석을 써요.')}
-        </details>
         <p id="setup-msg" class="note"></p>
         <button class="btn wide" type="submit">저장하고 시작하기</button>
       </form>`, 'setup');
@@ -555,7 +552,7 @@
     const v = (id) => ($(id)?.value || '').trim();
     const msg = $('#setup-msg');
     const btn = $('#setup-form button[type=submit]');
-    const body = { kakao: v('#s-kakao'), naverId: v('#s-nid'), naverSecret: v('#s-nsec'), claude: v('#s-claude'), passcode: v('#s-pass') };
+    const body = { kakao: v('#s-kakao'), naverId: v('#s-nid'), naverSecret: v('#s-nsec'), passcode: v('#s-pass') };
     const current = v('#s-cur') || store.get('mj.key') || '';
     btn.disabled = true; msg.textContent = '키를 확인하는 중…';
     try {
