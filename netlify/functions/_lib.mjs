@@ -9,10 +9,10 @@ import { getStore } from '@netlify/blobs';
 // which saves them in this site's private Blobs store (never sent back to the browser).
 const CONFIG = {};
 let loadedAt = 0;
-const LOCAL_FILE = process.env.MATJIP_CONFIG_FILE || '.matjip-config.json';
+const LOCAL_FILE = process.env.FOODAPP_CONFIG_FILE || '.foodapp-config.json';
 
 function configStore() {
-  try { return getStore({ name: 'matjip-config', consistency: 'strong' }); } catch { return null; }
+  try { return getStore({ name: 'foodapp-config', consistency: 'strong' }); } catch { return null; }
 }
 
 export async function readConfig() {
@@ -40,7 +40,7 @@ export async function loadConfig(force = false) {
   return CONFIG;
 }
 
-export const hashCode = (s) => createHash('sha256').update(`matjip:${s}`).digest('hex');
+export const hashCode = (s) => createHash('sha256').update(`foodapp:${s}`).digest('hex');
 
 export function envOnly(key) {
   const v = globalThis.Netlify?.env?.get?.(key) ?? process.env[key];
@@ -53,12 +53,12 @@ export function env(key) {
 
 // Your own Claude key only. Netlify's AI Gateway injects ANTHROPIC_API_KEY plus
 // ANTHROPIC_BASE_URL into every function and bills Netlify credits, so that key is
-// ignored unless MATJIP_USE_NETLIFY_AI=true.
+// ignored unless FOODAPP_USE_NETLIFY_AI=true.
 export function claudeKey() {
   if (CONFIG.ANTHROPIC_API_KEY) return String(CONFIG.ANTHROPIC_API_KEY);
   const k = envOnly('ANTHROPIC_API_KEY');
   if (!k) return undefined;
-  if (envOnly('ANTHROPIC_BASE_URL') && envOnly('MATJIP_USE_NETLIFY_AI') !== 'true') return undefined;
+  if (envOnly('ANTHROPIC_BASE_URL') && envOnly('FOODAPP_USE_NETLIFY_AI') !== 'true') return undefined;
   return k;
 }
 

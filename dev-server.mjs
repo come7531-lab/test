@@ -1,6 +1,6 @@
-// Local preview: `npm install && npm run dev` -> http://localhost:8888/matjip/
+// Local preview: `npm install && npm run dev` -> http://localhost:8888/foodapp/
 // Serves the static site and runs netlify/functions/*.mjs for /api/* routes.
-// Put keys in a .env file next to this one (see matjip/README.md).
+// Put keys in a .env file next to this one (see foodapp/README.md).
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
@@ -43,4 +43,4 @@ http.createServer(async (req, res) => {
   } catch (e) {
     res.writeHead(e.code === 'ENOENT' ? 404 : 500, { 'content-type': 'text/plain' }).end(String(e.message));
   }
-}).listen(port, () => console.log(`http://localhost:${port}/matjip/`));
+}).listen(port, () => console.log(`http://localhost:${port}/foodapp/`));

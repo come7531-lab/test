@@ -58,11 +58,11 @@ Netlify → Site configuration → Environment variables 에 넣습니다.
 ```sh
 npm install
 # .env 파일에 위 키들을 KEY=값 형식으로 적기
-npm run dev   # http://localhost:8888/matjip/
+npm run dev   # http://localhost:8888/foodapp/
 ```
 
 ## 파일
 
-- `matjip/` — 화면 (HTML/CSS/JS, 빌드 없음)
+- `foodapp/` — 화면 (HTML/CSS/JS, 빌드 없음)
 - `netlify/functions/` — API 키를 숨겨 주는 서버 함수 (`places`, `reviews`, `analyze`, `parking`, `image`, `status`)
 - `dev-server.mjs` — 로컬 실행용 서버
