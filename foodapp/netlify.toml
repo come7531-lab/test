@@ -1,0 +1,18 @@
+# Netlify site: come7531-foodapp (base directory: foodapp)
+[build]
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# old links
+[[redirects]]
+  from = "/foodapp/*"
+  to = "/:splat"
+  status = 301
+
+[[redirects]]
+  from = "/matjip/*"
+  to = "/:splat"
+  status = 301
